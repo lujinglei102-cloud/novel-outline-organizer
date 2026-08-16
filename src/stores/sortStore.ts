@@ -155,7 +155,27 @@ export const useSortStore = create<SortState>((set, get) => ({
   runEmotionRetag: async () => {
     // 对已排序卡片重新打情绪标签（不写回 DB 立即，留存在 state 中让用户预览）
     const cards = get().sortedCards.length > 0 ? get().sortedCards : await getAllCards()
+    console.log('[runEmotionRetag] 自动补标开始，共', cards.length, '张卡片')
+    // 打印补标前的情绪值
+    console.log('[runEmotionRetag] 补标前:')
+    cards.forEach((c, i) => {
+      console.log(`  #${i + 1} [${c.id.slice(0, 8)}] ${c.title || '(无标题)'} | emotion=${c.emotion ?? 'undefined'} intensity=${c.intensity ?? 'undefined'} emotionManual=${c.emotionManual ?? false}`)
+    })
     const tagged = engineRetagAll(cards) as Card[]
+    // 打印补标后的情绪值及变化
+    console.log('[runEmotionRetag] 补标后:')
+    tagged.forEach((c, i) => {
+      const oldE = cards[i]?.emotion ?? 0
+      const oldI = cards[i]?.intensity ?? 1
+      const eChanged = c.emotion !== oldE
+      const iChanged = c.intensity !== oldI
+      const flag = eChanged || iChanged ? ' ⚡已变更' : ''
+      console.log(`  #${i + 1} [${c.id.slice(0, 8)}] ${c.title || '(无标题)'} | emotion=${c.emotion} intensity=${c.intensity} emotionManual=${c.emotionManual ?? false}${flag}`)
+      if (eChanged) console.log(`       情绪: ${oldE} → ${c.emotion}`)
+      if (iChanged) console.log(`       冲突强度: ${oldI} → ${c.intensity}`)
+    })
+    const changedCount = tagged.filter((c, i) => c.emotion !== (cards[i]?.emotion ?? 0) || c.intensity !== (cards[i]?.intensity ?? 1)).length
+    console.log(`[runEmotionRetag] 共变更 ${changedCount}/${tagged.length} 张卡片，其中 ${tagged.filter((c) => c.emotionManual).length} 张保留手动值`)
     set({ sortedCards: tagged, emotionSeries: computeEmotionSeries(tagged) })
   },
 
@@ -166,11 +186,32 @@ export const useSortStore = create<SortState>((set, get) => ({
 
   restoreManualEmotion: async () => {
     // 从 DB 重新加载卡片，保持当前排序顺序，恢复 DB 中的情绪值
+    const beforeCards = get().sortedCards
+    console.log('[restoreManualEmotion] 恢复手动标注开始，当前', beforeCards.length, '张卡片')
+    // 打印恢复前（自动补标后）的情绪值
+    console.log('[restoreManualEmotion] 恢复前(自动补标结果):')
+    beforeCards.forEach((c, i) => {
+      console.log(`  #${i + 1} [${c.id.slice(0, 8)}] ${c.title || '(无标题)'} | emotion=${c.emotion ?? 'undefined'} intensity=${c.intensity ?? 'undefined'}`)
+    })
     const dbCards = await getAllCards()
     const currentOrder = get().sortedCards.map((c) => c.id)
     const restored = currentOrder
       .map((id) => dbCards.find((c) => c.id === id))
       .filter(Boolean) as Card[]
+    // 打印恢复后（DB 中的原始值）的情绪值及变化
+    console.log('[restoreManualEmotion] 恢复后(DB原始值):')
+    restored.forEach((c, i) => {
+      const oldE = beforeCards[i]?.emotion ?? 0
+      const oldI = beforeCards[i]?.intensity ?? 1
+      const eChanged = c.emotion !== oldE
+      const iChanged = c.intensity !== oldI
+      const flag = eChanged || iChanged ? ' ⚡已恢复' : ''
+      console.log(`  #${i + 1} [${c.id.slice(0, 8)}] ${c.title || '(无标题)'} | emotion=${c.emotion ?? 'undefined'} intensity=${c.intensity ?? 'undefined'} emotionManual=${c.emotionManual ?? false}${flag}`)
+      if (eChanged) console.log(`       情绪: ${oldE} → ${c.emotion}`)
+      if (iChanged) console.log(`       冲突强度: ${oldI} → ${c.intensity}`)
+    })
+    const changedCount = restored.filter((c, i) => c.emotion !== (beforeCards[i]?.emotion ?? 0) || c.intensity !== (beforeCards[i]?.intensity ?? 1)).length
+    console.log(`[restoreManualEmotion] 共恢复 ${changedCount}/${restored.length} 张卡片到 DB 原始值`)
     set({ sortedCards: restored, emotionSeries: computeEmotionSeries(restored) })
   },
 
