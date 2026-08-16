@@ -132,7 +132,11 @@ export function SortPage() {
         />
       )}
       {tab === 'links' && (
-        <ForeshadowView links={links} onRun={() => runLinks(sortedCards.length ? sortedCards : undefined)} />
+        <ForeshadowView
+          links={links}
+          manualForeshadowCards={sortedCards.filter((c) => c.isForeshadow)}
+          onRun={() => runLinks(sortedCards.length ? sortedCards : undefined)}
+        />
       )}
       {tab === 'emotion' && (
         <EmotionView
@@ -469,9 +473,11 @@ function CharactersView({
 /* =============== 子视图：伏笔 =============== */
 function ForeshadowView({
   links,
+  manualForeshadowCards,
   onRun,
 }: {
   links: Link[]
+  manualForeshadowCards: { id: string; title?: string; content: string }[]
   onRun: () => Promise<void>
 }) {
   const [runing, setRuning] = useState(false)
@@ -480,7 +486,7 @@ function ForeshadowView({
     <div>
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs text-ink-500">
-          共 {links.length} 条伏笔关联 · 展示 {visible.length} 条
+          自动关联 {links.length} 条 · 手动标记 {manualForeshadowCards.length} 条
         </p>
         <button
           onClick={async () => {
@@ -497,9 +503,35 @@ function ForeshadowView({
           ↻ 重新识别
         </button>
       </div>
+
+      {/* 手动标记的伏笔 */}
+      {manualForeshadowCards.length > 0 && (
+        <div className="mb-4">
+          <h3 className="mb-2 text-sm font-semibold text-purple-700">🔖 手动标记的伏笔</h3>
+          <ul className="space-y-2">
+            {manualForeshadowCards.map((c) => (
+              <li
+                key={c.id}
+                className="rounded border border-purple-300 bg-purple-50 p-3 text-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-purple-800">{c.title || '（无标题）'}</span>
+                  <Badge color="purple" label="手动标记" />
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs text-ink-600">{c.content}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 自动识别的伏笔关联 */}
+      <h3 className="mb-2 text-sm font-semibold text-ink-600">🔗 自动关联</h3>
       {visible.length === 0 ? (
         <div className="rounded border border-dashed border-ink-200 p-8 text-center text-sm text-ink-500">
           暂未发现伏笔关联，尝试在卡片中加入共同的信物或关键词（如玉佩、日记、项链等）。
+          <br />
+          也可以在卡片编辑中手动标记为伏笔。
         </div>
       ) : (
         <ul className="space-y-2">
@@ -537,7 +569,7 @@ function ForeshadowView({
   )
 }
 
-function Badge({ color, label }: { color: 'green' | 'gray' | 'amber' | 'red'; label: string }) {
+function Badge({ color, label }: { color: 'green' | 'gray' | 'amber' | 'red' | 'purple'; label: string }) {
   const cls =
     color === 'green'
       ? 'border-green-300 text-green-700 bg-green-50'
@@ -545,6 +577,8 @@ function Badge({ color, label }: { color: 'green' | 'gray' | 'amber' | 'red'; la
       ? 'border-amber-300 text-amber-700 bg-amber-50'
       : color === 'red'
       ? 'border-red-300 text-red-700 bg-red-50'
+      : color === 'purple'
+      ? 'border-purple-300 text-purple-700 bg-purple-50'
       : 'border-ink-200 text-ink-600 bg-ink-50'
   return <span className={`rounded border px-2 py-0.5 text-xs ${cls}`}>{label}</span>
 }

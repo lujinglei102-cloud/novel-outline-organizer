@@ -22,6 +22,7 @@ export interface Card {
   emotion?: number // -5..5
   intensity?: number // 1..5
   order?: number // 叙事线顺序
+  isForeshadow?: boolean // 手动标记为伏笔
 }
 
 // 角色

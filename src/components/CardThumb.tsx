@@ -70,6 +70,16 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
             [{stageLabel[card.stage]}]
           </span>
         )}
+        {card.isForeshadow && (
+          <span className="rounded border border-purple-300 bg-purple-50 px-1.5 py-0.5 text-xs text-purple-700">
+            🔖伏笔
+          </span>
+        )}
+        {typeof card.emotion === 'number' && card.emotion !== 0 && (
+          <span className="rounded border border-ink-200 px-1.5 py-0.5 text-xs text-ink-600">
+            情绪{card.emotion > 0 ? '+' : ''}{card.emotion}
+          </span>
+        )}
         <span className="ml-auto text-xs text-ink-400">{timeAgo(card.createdAt)}</span>
       </div>
     </div>

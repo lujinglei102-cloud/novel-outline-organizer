@@ -41,13 +41,20 @@ describe('CardEditModal', () => {
     expect(screen.getByTestId('card-save-btn')).not.toBeDisabled()
   })
 
-  it('保存时回调返回标题和正文', () => {
+  it('保存时回调返回标题、正文、情绪和伏笔标记', () => {
     const onSave = vi.fn()
     render(<CardEditModal onSave={onSave} onCancel={vi.fn()} />)
     fireEvent.change(screen.getByTestId('card-title-input'), { target: { value: '测试标题' } })
     fireEvent.change(screen.getByTestId('card-content-input'), { target: { value: '测试正文' } })
+    fireEvent.change(screen.getByTestId('card-emotion-input'), { target: { value: '-3' } })
+    fireEvent.click(screen.getByTestId('card-foreshadow-checkbox'))
     fireEvent.click(screen.getByTestId('card-save-btn'))
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ title: '测试标题', content: '测试正文' }))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      title: '测试标题',
+      content: '测试正文',
+      emotion: -3,
+      isForeshadow: true,
+    }))
   })
 
   it('标题超过100字被截断', () => {

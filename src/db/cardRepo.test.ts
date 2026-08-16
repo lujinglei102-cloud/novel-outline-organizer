@@ -69,4 +69,22 @@ describe('cardRepo', () => {
     const got = await getCard(card.id)
     expect(got?.characterId).toBe('char1')
   })
+
+  it('isForeshadow 默认 false', async () => {
+    const card = await addCard({ title: 't', content: 'x' })
+    expect(card.isForeshadow).toBe(false)
+  })
+
+  it('isForeshadow 可设置为 true', async () => {
+    const card = await addCard({ title: '伏笔卡', content: '玉佩的秘密', isForeshadow: true })
+    expect(card.isForeshadow).toBe(true)
+    const got = await getCard(card.id)
+    expect(got?.isForeshadow).toBe(true)
+  })
+
+  it('emotion 和 intensity 可在创建时指定', async () => {
+    const card = await addCard({ title: 't', content: 'x', emotion: -4, intensity: 3 })
+    expect(card.emotion).toBe(-4)
+    expect(card.intensity).toBe(3)
+  })
 })

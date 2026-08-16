@@ -7,7 +7,15 @@ const MAX_BODY_LEN = 500
 interface Props {
   initial?: Card
   characterName?: string
-  onSave: (input: { title: string; content: string; characterId?: string; stage?: Stage }) => void
+  onSave: (input: {
+    title: string
+    content: string
+    characterId?: string
+    stage?: Stage
+    emotion?: number
+    intensity?: number
+    isForeshadow?: boolean
+  }) => void
   onCancel: () => void
 }
 
@@ -15,6 +23,9 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
   const [title, setTitle] = useState(initial?.title ?? '')
   const [content, setContent] = useState(initial?.content ?? '')
   const [stage, setStage] = useState<Stage>(initial?.stage ?? 'none')
+  const [emotion, setEmotion] = useState(initial?.emotion ?? 0)
+  const [intensity, setIntensity] = useState(initial?.intensity ?? 1)
+  const [isForeshadow, setIsForeshadow] = useState(initial?.isForeshadow ?? false)
   const [hasInput, setHasInput] = useState(false)
 
   useEffect(() => {
@@ -31,6 +42,9 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
       content,
       characterId: initial?.characterId,
       stage,
+      emotion,
+      intensity,
+      isForeshadow,
     })
   }
 
@@ -41,7 +55,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
       onClick={onCancel}
     >
       <div
-        className="w-full max-w-xl rounded bg-white p-5 shadow-lg"
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded bg-white p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -102,6 +116,52 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
               </label>
             ))}
           </div>
+        </div>
+
+        {/* 情绪值 */}
+        <div className="mt-3">
+          <label className="mb-1 block text-xs text-ink-500">
+            情绪值：{emotion}（-5 极度负面 / 0 中性 / 5 极度正面）
+          </label>
+          <input
+            data-testid="card-emotion-input"
+            type="range"
+            min={-5}
+            max={5}
+            step={1}
+            value={emotion}
+            onChange={(e) => setEmotion(parseInt(e.target.value))}
+            className="w-full"
+          />
+        </div>
+
+        {/* 强度 */}
+        <div className="mt-2">
+          <label className="mb-1 block text-xs text-ink-500">强度：{intensity}（1~5）</label>
+          <input
+            data-testid="card-intensity-input"
+            type="range"
+            min={1}
+            max={5}
+            step={1}
+            value={intensity}
+            onChange={(e) => setIntensity(parseInt(e.target.value))}
+            className="w-full"
+          />
+        </div>
+
+        {/* 伏笔标记 */}
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            data-testid="card-foreshadow-checkbox"
+            type="checkbox"
+            checked={isForeshadow}
+            onChange={(e) => setIsForeshadow(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <label className="text-sm text-ink-700" onClick={() => setIsForeshadow(!isForeshadow)}>
+            🔖 标记为伏笔（这条灵感包含需要后续回收的伏笔）
+          </label>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
