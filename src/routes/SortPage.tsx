@@ -34,6 +34,7 @@ export function SortPage() {
     saveTagToCard,
     emotionSeries,
     loadPersisted,
+    reorderCards,
   } = useSortStore()
 
   const [tab, setTab] = useState<TabId>('line')
@@ -113,6 +114,7 @@ export function SortPage() {
           turningPoints={turningPoints}
           totalCount={cards.length}
           onRun={runSort}
+          onReorder={reorderCards}
           onHighlight={setHighlightCardId}
           highlightId={highlightCardId}
         />
@@ -149,6 +151,7 @@ function NarrativeLineView({
   turningPoints,
   totalCount,
   onRun,
+  onReorder,
   onHighlight,
   highlightId,
 }: {
@@ -157,10 +160,14 @@ function NarrativeLineView({
   turningPoints: TurningPoint[]
   totalCount: number
   onRun: () => Promise<void>
+  onReorder: (from: number, to: number) => Promise<void>
   onHighlight: (id: string | null) => void
   highlightId: string | null
 }) {
   const [runing, setRuning] = useState(false)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [overIndex, setOverIndex] = useState<number | null>(null)
+
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
@@ -169,6 +176,7 @@ function NarrativeLineView({
           {turningPoints.length > 0 && (
             <span className="ml-2 text-red-500">⚠ {turningPoints.length} 处转折事件待处理</span>
           )}
+          <span className="ml-2 text-ink-400">· 拖拽卡片可调整顺序</span>
         </p>
         <button
           onClick={async () => {
@@ -195,21 +203,49 @@ function NarrativeLineView({
             const gapHere = gaps.find((g) => g.afterIndex === i)
             const tpHere = turningPoints.filter((tp) => tp.afterCardId === c.id)
             const isHi = highlightId === c.id
+            const isDragging = dragIndex === i
+            const isOver = overIndex === i && dragIndex !== null && dragIndex !== i
             return (
               <li key={c.id}>
                 <div
+                  draggable
+                  onDragStart={(e) => {
+                    setDragIndex(i)
+                    e.dataTransfer.effectAllowed = 'move'
+                  }}
+                  onDragEnd={() => {
+                    setDragIndex(null)
+                    setOverIndex(null)
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setOverIndex(i)
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    if (dragIndex !== null && dragIndex !== i) {
+                      onReorder(dragIndex, i)
+                    }
+                    setDragIndex(null)
+                    setOverIndex(null)
+                  }}
                   onMouseEnter={() => onHighlight(c.id)}
                   onMouseLeave={() => onHighlight(null)}
                   className={
-                    'flex items-start gap-3 rounded border p-3 transition ' +
-                    (isHi
+                    'flex items-start gap-3 rounded border p-3 transition cursor-grab active:cursor-grabbing ' +
+                    (isDragging
+                      ? 'border-blue-500 bg-blue-50 opacity-50 '
+                      : isOver
+                      ? 'border-green-500 bg-green-50 '
+                      : isHi
                       ? 'border-blue-400 bg-blue-50'
                       : 'border-ink-200 bg-white hover:bg-ink-50')
                   }
                 >
-                  <span className="mt-1 w-6 flex-shrink-0 text-right text-xs text-ink-400">
+                  <span className="mt-1 w-6 flex-shrink-0 text-right text-xs text-ink-400 select-none">
                     {i + 1}
                   </span>
+                  <span className="mt-1 text-ink-300 select-none">⣿</span>
                   <CardThumb card={c as any} />
                 </div>
                 {tpHere.map((tp, idx) => (

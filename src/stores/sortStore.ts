@@ -52,6 +52,7 @@ interface SortState {
   selectDirection: (idx: number) => void
   applyChaptersFromDirection: (perNode?: number) => Promise<void>
   saveChapter: (id: string, patch: Partial<Pick<Chapter, 'title' | 'conflict' | 'cardIds' | 'nodeId' | 'index'>>) => Promise<void>
+  reorderCards: (fromIndex: number, toIndex: number) => Promise<void>
   addNode: (name: string) => void
   renameNode: (index: number, name: string) => void
   removeNode: (index: number) => void
@@ -190,6 +191,19 @@ export const useSortStore = create<SortState>((set, get) => ({
     set({
       chapters: get().chapters.map((c) => (c.id === id ? { ...c, ...patch } : c)),
     })
+  },
+
+  reorderCards: async (fromIndex, toIndex) => {
+    const cards = [...get().sortedCards]
+    if (fromIndex < 0 || fromIndex >= cards.length || toIndex < 0 || toIndex >= cards.length) return
+    const [moved] = cards.splice(fromIndex, 1)
+    cards.splice(toIndex, 0, moved)
+    // 更新 order 字段（基于新位置）
+    const updated = cards.map((c, i) => ({ ...c, order: i * 100 }))
+    set({ sortedCards: updated, emotionSeries: computeEmotionSeries(updated) })
+    // 写回 DB
+    const { updateCard } = await import('@/db/cardRepo')
+    await Promise.all(updated.map((c) => updateCard(c.id, { order: c.order })))
   },
 
   addNode: (name) => {
