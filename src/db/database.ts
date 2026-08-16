@@ -1,7 +1,8 @@
 import Dexie, { Table } from 'dexie'
-import type { Card, Character, Link, Chapter } from '@/types'
+import type { Card, Character, Link, Chapter, Book } from '@/types'
 
 export class AppDatabase extends Dexie {
+  books!: Table<Book, string>
   cards!: Table<Card, string>
   characters!: Table<Character, string>
   links!: Table<Link, string>
@@ -11,6 +12,13 @@ export class AppDatabase extends Dexie {
     super('novel-outline-db')
     this.version(1).stores({
       cards: 'id, createdAt, characterId, stage, order',
+      characters: 'id, name, mentionCount',
+      links: 'id, cardAId, cardBId, confirmed, hidden',
+      chapters: 'id, index, nodeId',
+    })
+    this.version(2).stores({
+      books: 'id, title, createdAt',
+      cards: 'id, createdAt, characterId, stage, order, bookId',
       characters: 'id, name, mentionCount',
       links: 'id, cardAId, cardBId, confirmed, hidden',
       chapters: 'id, index, nodeId',

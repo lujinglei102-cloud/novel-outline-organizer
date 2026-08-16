@@ -1,6 +1,14 @@
 // 灵感卡片所属阶段
 export type Stage = 'pre' | 'mid' | 'post' | 'none'
 
+// 书籍
+export interface Book {
+  id: string
+  title: string // 书名
+  createdAt: number
+  updatedAt: number
+}
+
 // 灵感卡片
 export interface Card {
   id: string
@@ -8,6 +16,7 @@ export interface Card {
   content: string // 正文 <=500 字
   createdAt: number
   updatedAt: number
+  bookId?: string // 所属书籍
   characterId?: string // 关联角色
   stage?: Stage // 前期/中期/后期/未分类
   emotion?: number // -5..5

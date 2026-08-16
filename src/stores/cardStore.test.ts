@@ -7,7 +7,7 @@ beforeEach(async () => {
   const db = new AppDatabase()
   setDatabase(db)
   await db.cards.clear()
-  useCardStore.setState({ cards: [], filterCharacterId: null })
+  useCardStore.setState({ cards: [], filterCharacterId: null, filterBookId: null })
 })
 
 describe('cardStore', () => {
