@@ -32,6 +32,8 @@ export function SortPage() {
     cardCharacterMap,
     runLinks,
     links,
+    toggleLinkResolved,
+    toggleForeshadowCard,
     runEmotionRetag,
     saveTagToCard,
     emotionSeries,
@@ -136,6 +138,8 @@ export function SortPage() {
           links={links}
           manualForeshadowCards={sortedCards.filter((c) => c.isForeshadow)}
           onRun={() => runLinks(sortedCards.length ? sortedCards : undefined)}
+          onToggleLinkResolved={toggleLinkResolved}
+          onToggleForeshadowCard={toggleForeshadowCard}
         />
       )}
       {tab === 'emotion' && (
@@ -475,18 +479,30 @@ function ForeshadowView({
   links,
   manualForeshadowCards,
   onRun,
+  onToggleLinkResolved,
+  onToggleForeshadowCard,
 }: {
   links: Link[]
-  manualForeshadowCards: { id: string; title?: string; content: string }[]
+  manualForeshadowCards: { id: string; title?: string; content: string; foreshadowResolved?: boolean }[]
   onRun: () => Promise<void>
+  onToggleLinkResolved: (id: string) => Promise<void>
+  onToggleForeshadowCard: (cardId: string) => Promise<void>
 }) {
   const [runing, setRuning] = useState(false)
   const visible = links.filter((l) => !l.hidden)
+  const unresolvedLinks = visible.filter((l) => !l.resolved)
+  const unresolvedCards = manualForeshadowCards.filter((c) => !c.foreshadowResolved)
+
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs text-ink-500">
           自动关联 {links.length} 条 · 手动标记 {manualForeshadowCards.length} 条
+          {(unresolvedLinks.length + unresolvedCards.length) > 0 && (
+            <span className="ml-2 text-red-500">
+              ⚠ {unresolvedLinks.length + unresolvedCards.length} 条未回收
+            </span>
+          )}
         </p>
         <button
           onClick={async () => {
@@ -509,18 +525,35 @@ function ForeshadowView({
         <div className="mb-4">
           <h3 className="mb-2 text-sm font-semibold text-purple-700">🔖 手动标记的伏笔</h3>
           <ul className="space-y-2">
-            {manualForeshadowCards.map((c) => (
-              <li
-                key={c.id}
-                className="rounded border border-purple-300 bg-purple-50 p-3 text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-purple-800">{c.title || '（无标题）'}</span>
-                  <Badge color="purple" label="手动标记" />
-                </div>
-                <p className="mt-1 line-clamp-2 text-xs text-ink-600">{c.content}</p>
-              </li>
-            ))}
+            {manualForeshadowCards.map((c) => {
+              const resolved = c.foreshadowResolved
+              return (
+                <li
+                  key={c.id}
+                  className={
+                    'rounded border p-3 text-sm ' +
+                    (resolved
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-red-300 bg-red-50')
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    {!resolved && <span className="text-red-500 text-base">⚠️</span>}
+                    <span className="font-medium text-ink-800">{c.title || '（无标题）'}</span>
+                    <Badge color="purple" label="手动标记" />
+                    <Badge color={resolved ? 'green' : 'red'} label={resolved ? '已回收' : '未回收'} />
+                    <button
+                      data-testid={`resolve-card-${c.id}`}
+                      onClick={() => onToggleForeshadowCard(c.id)}
+                      className="ml-auto rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-50"
+                    >
+                      {resolved ? '↩ 取消回收' : '✓ 确认回收'}
+                    </button>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-xs text-ink-600">{c.content}</p>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
@@ -535,34 +568,46 @@ function ForeshadowView({
         </div>
       ) : (
         <ul className="space-y-2">
-          {visible.map((l) => (
-            <li
-              key={l.id}
-              className={
-                'rounded border p-3 text-sm ' +
-                (l.confirmed
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-ink-200 bg-white')
-              }
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
-                  #{l.cardAId.slice(0, 8)}
-                </span>
-                <span className="text-ink-400">⇌</span>
-                <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
-                  #{l.cardBId.slice(0, 8)}
-                </span>
-                <span className="ml-2 text-ink-800">共现词：{l.reason}</span>
-                <span className="ml-auto flex gap-2 text-xs">
-                  <Badge
-                    color={l.confirmed ? 'green' : 'gray'}
-                    label={l.confirmed ? '已埋' : '待确认'}
-                  />
-                </span>
-              </div>
-            </li>
-          ))}
+          {visible.map((l) => {
+            const resolved = l.resolved
+            return (
+              <li
+                key={l.id}
+                className={
+                  'rounded border p-3 text-sm ' +
+                  (resolved
+                    ? 'border-green-300 bg-green-50'
+                    : 'border-red-300 bg-red-50')
+                }
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  {!resolved && <span className="text-red-500 text-base">⚠️</span>}
+                  <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
+                    #{l.cardAId.slice(0, 8)}
+                  </span>
+                  <span className="text-ink-400">⇌</span>
+                  <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
+                    #{l.cardBId.slice(0, 8)}
+                  </span>
+                  <span className="ml-2 text-ink-800">共现词：{l.reason}</span>
+                  <span className="ml-auto flex items-center gap-2 text-xs">
+                    <Badge
+                      color={l.confirmed ? 'green' : 'gray'}
+                      label={l.confirmed ? '已埋' : '待确认'}
+                    />
+                    <Badge color={resolved ? 'green' : 'red'} label={resolved ? '已回收' : '未回收'} />
+                    <button
+                      data-testid={`resolve-link-${l.id}`}
+                      onClick={() => onToggleLinkResolved(l.id)}
+                      className="rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-50"
+                    >
+                      {resolved ? '↩ 取消' : '✓ 回收'}
+                    </button>
+                  </span>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

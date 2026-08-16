@@ -39,7 +39,7 @@ export async function addCard(input: {
 
 export async function updateCard(
   id: string,
-  patch: Partial<Pick<Card, 'title' | 'content' | 'bookId' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order' | 'isForeshadow'>>,
+  patch: Partial<Pick<Card, 'title' | 'content' | 'bookId' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order' | 'isForeshadow' | 'foreshadowResolved'>>,
 ): Promise<void> {
   const update: Record<string, unknown> = { updatedAt: Date.now() }
   if (patch.title !== undefined) update.title = patch.title.slice(0, 100)
@@ -51,6 +51,7 @@ export async function updateCard(
   if (patch.intensity !== undefined) update.intensity = patch.intensity
   if (patch.order !== undefined) update.order = patch.order
   if (patch.isForeshadow !== undefined) update.isForeshadow = patch.isForeshadow
+  if (patch.foreshadowResolved !== undefined) update.foreshadowResolved = patch.foreshadowResolved
   await db.cards.update(id, update)
 }
 

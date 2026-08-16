@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { Card, Character, Link, Chapter, SortGap, Template } from '@/types'
 import { getAllCards } from '@/db/cardRepo'
 import { getAllCharacters, putCharacters, updateCharacter, deleteCharacter } from '@/db/characterRepo'
-import { getAllLinks, putLinks } from '@/db/linkRepo'
+import { getAllLinks, putLinks, toggleLinkResolved } from '@/db/linkRepo'
 import { getAllChapters, putChapters } from '@/db/chapterRepo'
 
 import { sortNarrativeLine } from '@/engine/narrativeLine'
@@ -46,6 +46,8 @@ interface SortState {
   removeCharacter: (id: string) => Promise<void>
   renameCharacter: (id: string, name: string) => Promise<void>
   runLinks: (cards?: Card[]) => Promise<void>
+  toggleLinkResolved: (id: string) => Promise<void>
+  toggleForeshadowCard: (cardId: string) => Promise<void>
   runEmotionRetag: () => Promise<void>
   saveTagToCard: (cardId: string, emotion: number, intensity: number) => Promise<void>
   runSkeletonDirections: (
@@ -126,6 +128,26 @@ export const useSortStore = create<SortState>((set, get) => ({
     const found = findForeshadowLinks(cards)
     set({ links: found })
     await putLinks(found)
+  },
+
+  toggleLinkResolved: async (id) => {
+    await toggleLinkResolved(id)
+    set({
+      links: get().links.map((l) => (l.id === id ? { ...l, resolved: !l.resolved } : l)),
+    })
+  },
+
+  toggleForeshadowCard: async (cardId) => {
+    const card = get().sortedCards.find((c) => c.id === cardId)
+    if (!card) return
+    const newResolved = !card.foreshadowResolved
+    const { updateCard } = await import('@/db/cardRepo')
+    await updateCard(cardId, { foreshadowResolved: newResolved })
+    set({
+      sortedCards: get().sortedCards.map((c) =>
+        c.id === cardId ? { ...c, foreshadowResolved: newResolved } : c,
+      ),
+    })
   },
 
   runEmotionRetag: async () => {

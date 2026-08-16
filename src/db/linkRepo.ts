@@ -23,3 +23,9 @@ export async function toggleLinkHidden(id: string): Promise<void> {
   if (!row) return
   await db.links.update(id, { hidden: !row.hidden })
 }
+
+export async function toggleLinkResolved(id: string): Promise<void> {
+  const row = await db.links.get(id)
+  if (!row) return
+  await db.links.update(id, { resolved: !row.resolved })
+}

@@ -5,6 +5,7 @@ import { useSortStore } from '@/stores/sortStore'
 import { useCardStore } from '@/stores/cardStore'
 import { addCard } from '@/db/cardRepo'
 import { getAllCharacters } from '@/db/characterRepo'
+import { getAllLinks } from '@/db/linkRepo'
 
 beforeEach(async () => {
   const db = new AppDatabase()
@@ -116,5 +117,76 @@ describe('sortStore - removeCharacter / renameCharacter', () => {
 
     const updated = useSortStore.getState().characters.find((c) => c.id === targetId)
     expect(updated?.name).toBe(oldName)
+  })
+})
+
+describe('sortStore - toggleForeshadowCard', () => {
+  it('切换手动伏笔的回收状态（未回收→已回收）', async () => {
+    await addCard({
+      title: '玉佩伏笔',
+      content: '女主把玉佩埋在树下',
+      stage: 'pre',
+      isForeshadow: true,
+    })
+    await useSortStore.getState().runSort()
+
+    const card = useSortStore.getState().sortedCards[0]
+    expect(card.isForeshadow).toBe(true)
+    expect(card.foreshadowResolved).toBeFalsy()
+
+    await useSortStore.getState().toggleForeshadowCard(card.id)
+
+    const updated = useSortStore.getState().sortedCards.find((c) => c.id === card.id)
+    expect(updated?.foreshadowResolved).toBe(true)
+  })
+
+  it('已回收可再次切换回未回收', async () => {
+    await addCard({
+      title: '玉佩伏笔',
+      content: '女主把玉佩埋在树下',
+      stage: 'pre',
+      isForeshadow: true,
+    })
+    await useSortStore.getState().runSort()
+
+    const cardId = useSortStore.getState().sortedCards[0].id
+    await useSortStore.getState().toggleForeshadowCard(cardId)
+    expect(
+      useSortStore.getState().sortedCards.find((c) => c.id === cardId)?.foreshadowResolved,
+    ).toBe(true)
+
+    await useSortStore.getState().toggleForeshadowCard(cardId)
+    expect(
+      useSortStore.getState().sortedCards.find((c) => c.id === cardId)?.foreshadowResolved,
+    ).toBe(false)
+  })
+
+  it('对不存在于 sortedCards 的 id 调用不报错', async () => {
+    await useSortStore.getState().toggleForeshadowCard('not-exist')
+    expect(useSortStore.getState().sortedCards).toHaveLength(0)
+  })
+})
+
+describe('sortStore - toggleLinkResolved', () => {
+  it('切换自动伏笔关联的回收状态', async () => {
+    // 两条卡片都包含同一信物「玉佩」，触发自动伏笔关联
+    await addCard({ title: '埋下伏笔', content: '女主把玉佩埋在树下', stage: 'pre' })
+    await addCard({ title: '回收伏笔', content: '男主挖出当年的玉佩', stage: 'post' })
+    await useSortStore.getState().runSort()
+    await useSortStore.getState().runLinks()
+
+    const links = useSortStore.getState().links
+    expect(links.length).toBeGreaterThan(0)
+    expect(links[0].resolved).toBeFalsy()
+
+    const linkId = links[0].id
+    await useSortStore.getState().toggleLinkResolved(linkId)
+
+    const updated = useSortStore.getState().links.find((l) => l.id === linkId)
+    expect(updated?.resolved).toBe(true)
+
+    // DB 中也持久化了
+    const dbLinks = await getAllLinks()
+    expect(dbLinks.find((l) => l.id === linkId)?.resolved).toBe(true)
   })
 })

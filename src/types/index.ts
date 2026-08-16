@@ -23,6 +23,7 @@ export interface Card {
   intensity?: number // 1..5
   order?: number // 叙事线顺序
   isForeshadow?: boolean // 手动标记为伏笔
+  foreshadowResolved?: boolean // 伏笔是否已回收
 }
 
 // 角色
@@ -42,6 +43,7 @@ export interface Link {
   reason: string // 共现关键词
   confirmed: boolean
   hidden: boolean
+  resolved?: boolean // 伏笔是否已回收
 }
 
 // 关键锚点
