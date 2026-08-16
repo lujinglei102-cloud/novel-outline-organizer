@@ -26,6 +26,8 @@ export function SortPage() {
     gaps,
     turningPoints,
     runCharacters,
+    removeCharacter,
+    renameCharacter,
     characters,
     cardCharacterMap,
     runLinks,
@@ -125,6 +127,8 @@ export function SortPage() {
           cardCharacterMap={cardCharacterMap}
           sortedCards={sortedCards}
           onRun={() => runCharacters(sortedCards.length ? sortedCards : undefined)}
+          onRemove={removeCharacter}
+          onRename={renameCharacter}
         />
       )}
       {tab === 'links' && (
@@ -288,14 +292,20 @@ function CharactersView({
   cardCharacterMap,
   sortedCards,
   onRun,
+  onRemove,
+  onRename,
 }: {
   characters: Character[]
   cardCharacterMap: Record<string, string>
-  sortedCards: { id: string; content: string }[]
+  sortedCards: { id: string; title?: string; content: string }[]
   onRun: () => Promise<void>
+  onRemove: (id: string) => Promise<void>
+  onRename: (id: string, name: string) => Promise<void>
 }) {
   const [runing, setRuning] = useState(false)
   const [selCharId, setSelCharId] = useState<string | null>(characters[0]?.id ?? null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
   const selChar = characters.find((c) => c.id === selCharId)
   const relatedCards = sortedCards.filter(
     (c) => cardCharacterMap[c.id] === (selChar?.name ?? ''),
@@ -303,7 +313,10 @@ function CharactersView({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs text-ink-500">共识别到 {characters.length} 个角色</p>
+        <p className="text-xs text-ink-500">
+          共识别到 {characters.length} 个角色
+          <span className="ml-2 text-ink-400">· 可删除误判项或编辑角色名</span>
+        </p>
         <button
           onClick={async () => {
             setRuning(true)
@@ -328,25 +341,81 @@ function CharactersView({
               {characters.map((c) => (
                 <li
                   key={c.id}
-                  onClick={() => setSelCharId(c.id)}
                   className={
-                    'cursor-pointer rounded border px-2.5 py-1.5 text-sm transition ' +
+                    'rounded border px-2.5 py-1.5 text-sm transition ' +
                     (selCharId === c.id
                       ? 'border-ink-800 bg-ink-800 text-white'
                       : 'border-ink-100 hover:border-ink-300')
                   }
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{c.name}</span>
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setSelCharId(c.id)}
+                  >
+                    {editingId === c.id ? (
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            onRename(c.id, editName)
+                            setEditingId(null)
+                          }
+                          if (e.key === 'Escape') setEditingId(null)
+                        }}
+                        className="w-full rounded border border-ink-300 px-1.5 py-0.5 text-sm text-ink-800"
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <span className="font-medium">{c.name}</span>
+                    )}
                     <span
                       className={
-                        'text-xs ' +
+                        'ml-2 flex-shrink-0 text-xs ' +
                         (selCharId === c.id ? 'text-white/70' : 'text-ink-400')
                       }
                     >
                       ×{c.mentionCount}
                     </span>
                   </div>
+                  {editingId !== c.id && (
+                    <div className="mt-1 flex gap-2 text-xs">
+                      <button
+                        data-testid={`char-edit-${c.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingId(c.id)
+                          setEditName(c.name)
+                        }}
+                        className={
+                          selCharId === c.id
+                            ? 'text-blue-200 hover:text-blue-100'
+                            : 'text-blue-600 hover:underline'
+                        }
+                      >
+                        编辑
+                      </button>
+                      <button
+                        data-testid={`char-delete-${c.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm(`确认删除"${c.name}"？这不是角色名的话可以删掉。`)) {
+                            onRemove(c.id)
+                            if (selCharId === c.id) setSelCharId(null)
+                          }
+                        }}
+                        className={
+                          selCharId === c.id
+                            ? 'text-red-200 hover:text-red-100'
+                            : 'text-red-600 hover:underline'
+                        }
+                      >
+                        删除
+                      </button>
+                    </div>
+                  )}
                   {c.conflictTag && (
                     <div
                       className={

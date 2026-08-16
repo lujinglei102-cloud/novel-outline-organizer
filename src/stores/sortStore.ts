@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Card, Character, Link, Chapter, SortGap, Template } from '@/types'
 import { getAllCards } from '@/db/cardRepo'
-import { getAllCharacters, putCharacters } from '@/db/characterRepo'
+import { getAllCharacters, putCharacters, updateCharacter, deleteCharacter } from '@/db/characterRepo'
 import { getAllLinks, putLinks } from '@/db/linkRepo'
 import { getAllChapters, putChapters } from '@/db/chapterRepo'
 
@@ -43,6 +43,8 @@ interface SortState {
   // actions
   runSort: () => Promise<void>
   runCharacters: (cards?: Card[]) => Promise<void>
+  removeCharacter: (id: string) => Promise<void>
+  renameCharacter: (id: string, name: string) => Promise<void>
   runLinks: (cards?: Card[]) => Promise<void>
   runEmotionRetag: () => Promise<void>
   saveTagToCard: (cardId: string, emotion: number, intensity: number) => Promise<void>
@@ -104,6 +106,19 @@ export const useSortStore = create<SortState>((set, get) => ({
     const r = extractCharacters(cards)
     set({ characters: r.characters, cardCharacterMap: Object.fromEntries(r.cardCharacterMap) })
     await putCharacters(r.characters)
+  },
+
+  removeCharacter: async (id) => {
+    await deleteCharacter(id)
+    set({ characters: get().characters.filter((c) => c.id !== id) })
+  },
+
+  renameCharacter: async (id, name) => {
+    if (!name.trim()) return
+    await updateCharacter(id, { name: name.trim() })
+    set({
+      characters: get().characters.map((c) => (c.id === id ? { ...c, name: name.trim() } : c)),
+    })
   },
 
   runLinks: async (cardsIn) => {

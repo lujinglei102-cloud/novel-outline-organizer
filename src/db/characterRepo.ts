@@ -18,3 +18,7 @@ export async function updateCharacter(
 ): Promise<void> {
   await db.characters.update(id, patch as any)
 }
+
+export async function deleteCharacter(id: string): Promise<void> {
+  await db.characters.delete(id)
+}
