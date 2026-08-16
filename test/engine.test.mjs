@@ -356,6 +356,7 @@ import('node:test').then(async ({ describe, it }) => {
   function mkCard(id, content, overrides = {}) {
     return {
       id,
+      title: overrides.title ?? content.slice(0, 20),
       content,
       createdAt: overrides.createdAt ?? Date.now() - parseInt(id.replace(/\D/g, '') || '0') * 60000,
       updatedAt: Date.now(),
@@ -402,6 +403,29 @@ import('node:test').then(async ({ describe, it }) => {
     const c2 = mkCard('b', '结局了', { stage: 'post' })
     const res = nr.sortNarrativeLine([c1, c2])
     assert.ok(res.gaps.some((g) => g.density === 'sparse'))
+  })
+
+  await check('阶段跳跃 pre→post 检测到转折事件', () => {
+    const c1 = mkCard('a', '初见', { stage: 'pre' })
+    const c2 = mkCard('b', '结局了', { stage: 'post' })
+    const res = nr.sortNarrativeLine([c1, c2])
+    assert.ok(res.turningPoints.length > 0)
+    assert.ok(res.turningPoints.some((tp) => tp.type === 'stage_transition'))
+  })
+
+  await check('情绪翻转检测到转折事件', () => {
+    const c1 = mkCard('a', '甜蜜初遇', { stage: 'pre', emotion: 5 })
+    const c2 = mkCard('b', '心碎分手', { stage: 'post', emotion: -5 })
+    const res = nr.sortNarrativeLine([c1, c2])
+    assert.ok(res.turningPoints.some((tp) => tp.type === 'emotion_shift'))
+  })
+
+  await check('含转折关键词时不报转折缺失', () => {
+    const c1 = mkCard('a', '甜蜜初遇', { stage: 'pre' })
+    const c2 = mkCard('b', '然而结局了', { stage: 'post' })
+    const res = nr.sortNarrativeLine([c1, c2])
+    // stage_transition 仍然会报，但 score_gap 不应该报（因为有"然而"转折词）
+    assert.ok(!res.turningPoints.some((tp) => tp.type === 'score_gap'))
   })
 
   // ===================== characterExtract =====================

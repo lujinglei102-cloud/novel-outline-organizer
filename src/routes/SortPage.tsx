@@ -5,6 +5,7 @@ import { useSortStore } from '@/stores/sortStore'
 import { CardThumb } from '@/components/CardThumb'
 import { EmotionCurve } from '@/components/EmotionCurve'
 import type { Character, Link, SortGap } from '@/types'
+import type { TurningPoint } from '@/engine/narrativeLine'
 
 const TABS = [
   { id: 'line', label: '叙事线排序' },
@@ -23,6 +24,7 @@ export function SortPage() {
     runSort,
     sortedCards,
     gaps,
+    turningPoints,
     runCharacters,
     characters,
     cardCharacterMap,
@@ -108,6 +110,7 @@ export function SortPage() {
         <NarrativeLineView
           cards={sortedCards}
           gaps={gaps}
+          turningPoints={turningPoints}
           totalCount={cards.length}
           onRun={runSort}
           onHighlight={setHighlightCardId}
@@ -143,13 +146,15 @@ export function SortPage() {
 function NarrativeLineView({
   cards,
   gaps,
+  turningPoints,
   totalCount,
   onRun,
   onHighlight,
   highlightId,
 }: {
-  cards: { id: string; content: string; createdAt: number; stage?: string }[]
+  cards: { id: string; title?: string; content: string; createdAt: number; stage?: string }[]
   gaps: SortGap[]
+  turningPoints: TurningPoint[]
   totalCount: number
   onRun: () => Promise<void>
   onHighlight: (id: string | null) => void
@@ -161,6 +166,9 @@ function NarrativeLineView({
       <div className="mb-3 flex items-center justify-between">
         <p className="text-xs text-ink-500">
           已排 {cards.length} / {totalCount} 张卡片
+          {turningPoints.length > 0 && (
+            <span className="ml-2 text-red-500">⚠ {turningPoints.length} 处转折事件待处理</span>
+          )}
         </p>
         <button
           onClick={async () => {
@@ -185,6 +193,7 @@ function NarrativeLineView({
         <ol className="space-y-2">
           {cards.map((c, i) => {
             const gapHere = gaps.find((g) => g.afterIndex === i)
+            const tpHere = turningPoints.filter((tp) => tp.afterCardId === c.id)
             const isHi = highlightId === c.id
             return (
               <li key={c.id}>
@@ -203,7 +212,20 @@ function NarrativeLineView({
                   </span>
                   <CardThumb card={c as any} />
                 </div>
-                {gapHere && (
+                {tpHere.map((tp, idx) => (
+                  <div
+                    key={`${tp.type}-${idx}`}
+                    className={
+                      'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
+                      (tp.severity === 'high'
+                        ? 'border-red-500 bg-red-50 text-red-700'
+                        : 'border-orange-400 bg-orange-50 text-orange-700')
+                    }
+                  >
+                    {tp.severity === 'high' ? '🔴' : '🟠'} [{tp.type === 'stage_transition' ? '阶段跳跃' : tp.type === 'emotion_shift' ? '情绪翻转' : '转折缺失'}] {tp.hint}
+                  </div>
+                ))}
+                {gapHere && !tpHere.length && (
                   <div
                     className={
                       'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +

@@ -6,6 +6,7 @@ import { getAllLinks, putLinks } from '@/db/linkRepo'
 import { getAllChapters, putChapters } from '@/db/chapterRepo'
 
 import { sortNarrativeLine } from '@/engine/narrativeLine'
+import type { TurningPoint } from '@/engine/narrativeLine'
 import { extractCharacters } from '@/engine/characterExtract'
 import { findForeshadowLinks } from '@/engine/foreshadowLink'
 import { tagEmotion, retagAll as engineRetagAll } from '@/engine/emotionTag'
@@ -23,6 +24,7 @@ interface SortState {
   // narrative
   sortedCards: Card[]
   gaps: SortGap[]
+  turningPoints: TurningPoint[]
   sortedAt: number | null
   // characters
   characters: Character[]
@@ -71,6 +73,7 @@ function computeEmotionSeries(cards: Card[]) {
 export const useSortStore = create<SortState>((set, get) => ({
   sortedCards: [],
   gaps: [],
+  turningPoints: [],
   sortedAt: null,
   characters: [],
   cardCharacterMap: {},
@@ -84,11 +87,12 @@ export const useSortStore = create<SortState>((set, get) => ({
 
   runSort: async () => {
     const cards = await getAllCards()
-    const { cards: sorted, gaps } = sortNarrativeLine(cards)
+    const { cards: sorted, gaps, turningPoints } = sortNarrativeLine(cards)
     // 把 order 回写到每张卡（仅 memory，用户确认后再保存）
     set({
       sortedCards: sorted,
       gaps,
+      turningPoints,
       sortedAt: Date.now(),
       emotionSeries: computeEmotionSeries(sorted),
     })
@@ -218,6 +222,7 @@ export const useSortStore = create<SortState>((set, get) => ({
     set({
       sortedCards: [],
       gaps: [],
+      turningPoints: [],
       sortedAt: null,
       characters: [],
       cardCharacterMap: {},
