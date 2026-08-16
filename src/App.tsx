@@ -7,7 +7,7 @@ import { ExportPage } from '@/routes/ExportPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/novel-outline-organizer">
       <div className="min-h-screen relative z-10 text-ink-800">
         <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-4">
