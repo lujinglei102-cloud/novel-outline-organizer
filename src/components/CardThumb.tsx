@@ -27,7 +27,10 @@ interface Props {
 }
 
 export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile }: Props) {
-  const lines = mobile ? 4 : 2
+  const bodyLines = mobile ? 4 : 2
+  const displayTitle = card.title || '（无标题）'
+  const hasBody = card.content && card.content.trim().length > 0
+
   return (
     <div
       data-testid="card-thumb"
@@ -35,17 +38,27 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       onDoubleClick={onDoubleClick}
       className="cursor-pointer rounded border border-ink-200 bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <p
-        className="text-sm text-ink-800"
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: lines,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {card.content}
+      {/* 标题 */}
+      <p className="mb-1 text-sm font-semibold text-ink-800 line-clamp-1">
+        {displayTitle}
       </p>
+
+      {/* 正文（截断显示） */}
+      {hasBody && (
+        <p
+          className="text-xs text-ink-500"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: bodyLines,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {card.content}
+        </p>
+      )}
+
+      {/* 标签栏 */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {characterName && (
           <span className="rounded border border-ink-200 px-1.5 py-0.5 text-xs text-ink-600">

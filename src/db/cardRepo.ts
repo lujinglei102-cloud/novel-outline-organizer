@@ -10,6 +10,7 @@ export async function getAllCards(): Promise<Card[]> {
 }
 
 export async function addCard(input: {
+  title: string
   content: string
   characterId?: string
   stage?: Stage
@@ -17,6 +18,7 @@ export async function addCard(input: {
   const now = Date.now()
   const card: Card = {
     id: genId(),
+    title: input.title.slice(0, 100),
     content: input.content.slice(0, 500),
     createdAt: now,
     updatedAt: now,
@@ -31,9 +33,10 @@ export async function addCard(input: {
 
 export async function updateCard(
   id: string,
-  patch: Partial<Pick<Card, 'content' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order'>>,
+  patch: Partial<Pick<Card, 'title' | 'content' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order'>>,
 ): Promise<void> {
   const update: Record<string, unknown> = { updatedAt: Date.now() }
+  if (patch.title !== undefined) update.title = patch.title.slice(0, 100)
   if (patch.content !== undefined) update.content = patch.content.slice(0, 500)
   if (patch.characterId !== undefined) update.characterId = patch.characterId
   if (patch.stage !== undefined) update.stage = patch.stage

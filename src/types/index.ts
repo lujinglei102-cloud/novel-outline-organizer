@@ -4,7 +4,8 @@ export type Stage = 'pre' | 'mid' | 'post' | 'none'
 // 灵感卡片
 export interface Card {
   id: string
-  content: string // <=500 字
+  title: string // 卡片标题
+  content: string // 正文 <=500 字
   createdAt: number
   updatedAt: number
   characterId?: string // 关联角色

@@ -1,10 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { CardThumb } from '@/components/CardThumb'
 import type { Card } from '@/types'
 
 const baseCard: Card = {
   id: 'c1',
+  title: '初遇场景',
   content: '这是一条灵感卡片内容，用于测试缩略显示',
   createdAt: Date.now() - 60000,
   updatedAt: Date.now() - 60000,
@@ -12,9 +13,20 @@ const baseCard: Card = {
 }
 
 describe('CardThumb', () => {
-  it('渲染卡片内容', () => {
+  it('渲染卡片标题', () => {
+    render(<CardThumb card={baseCard} />)
+    expect(screen.getByText('初遇场景')).toBeInTheDocument()
+  })
+
+  it('正文截断显示', () => {
     render(<CardThumb card={baseCard} />)
     expect(screen.getByText(/这是一条灵感卡片内容/)).toBeInTheDocument()
+  })
+
+  it('无正文时只显示标题', () => {
+    render(<CardThumb card={{ ...baseCard, content: '' }} />)
+    expect(screen.getByText('初遇场景')).toBeInTheDocument()
+    expect(screen.queryByText(/这是一条灵感/)).not.toBeInTheDocument()
   })
 
   it('显示阶段标签', () => {

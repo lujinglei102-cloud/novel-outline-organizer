@@ -1,29 +1,33 @@
 import { useState, useEffect } from 'react'
 import type { Card, Stage } from '@/types'
 
-const MAX_LEN = 500
+const MAX_TITLE_LEN = 100
+const MAX_BODY_LEN = 500
 
 interface Props {
   initial?: Card
   characterName?: string
-  onSave: (input: { content: string; characterId?: string; stage?: Stage }) => void
+  onSave: (input: { title: string; content: string; characterId?: string; stage?: Stage }) => void
   onCancel: () => void
 }
 
 export function CardEditModal({ initial, characterName, onSave, onCancel }: Props) {
+  const [title, setTitle] = useState(initial?.title ?? '')
   const [content, setContent] = useState(initial?.content ?? '')
   const [stage, setStage] = useState<Stage>(initial?.stage ?? 'none')
   const [hasInput, setHasInput] = useState(false)
 
   useEffect(() => {
-    setHasInput(content.trim().length > 0)
-  }, [content])
+    setHasInput(title.trim().length > 0)
+  }, [title])
 
-  const remaining = MAX_LEN - content.length
+  const remainingTitle = MAX_TITLE_LEN - title.length
+  const remainingBody = MAX_BODY_LEN - content.length
 
   const handleSave = () => {
-    if (!content.trim()) return
+    if (!title.trim()) return
     onSave({
+      title,
       content,
       characterId: initial?.characterId,
       stage,
@@ -49,18 +53,33 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
           </button>
         </div>
 
+        {/* 标题 */}
         <label className="mb-1 block text-xs text-ink-500">
-          内容（必填，最多 {MAX_LEN} 字）
+          标题（必填，最多 {MAX_TITLE_LEN} 字）
+        </label>
+        <input
+          data-testid="card-title-input"
+          type="text"
+          autoFocus
+          value={title}
+          onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE_LEN))}
+          className="mb-1 w-full rounded border border-ink-200 px-2 py-1.5 text-sm font-medium focus:outline-none focus:border-ink-500"
+          placeholder="给这条灵感起个标题…"
+        />
+        <div className="mb-3 text-right text-xs text-ink-400">剩余 {remainingTitle} 字</div>
+
+        {/* 正文 */}
+        <label className="mb-1 block text-xs text-ink-500">
+          正文（可选，最多 {MAX_BODY_LEN} 字）
         </label>
         <textarea
           data-testid="card-content-input"
-          autoFocus
           value={content}
-          onChange={(e) => setContent(e.target.value.slice(0, MAX_LEN))}
+          onChange={(e) => setContent(e.target.value.slice(0, MAX_BODY_LEN))}
           className="h-28 w-full resize-none rounded border border-ink-200 p-2 text-sm focus:outline-none focus:border-ink-500"
-          placeholder="输入灵感……"
+          placeholder="详细描述这个灵感……"
         />
-        <div className="mt-1 text-right text-xs text-ink-400">剩余 {remaining} 字</div>
+        <div className="mt-1 text-right text-xs text-ink-400">剩余 {remainingBody} 字</div>
 
         {characterName && (
           <div className="mt-2 text-xs text-ink-500">关联角色：{characterName}</div>

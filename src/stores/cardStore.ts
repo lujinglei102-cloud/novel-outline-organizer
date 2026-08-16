@@ -7,10 +7,10 @@ interface CardState {
   loading: boolean
   filterCharacterId: string | null
   loadAll: () => Promise<void>
-  create: (input: { content: string; characterId?: string; stage?: Stage }) => Promise<Card>
+  create: (input: { title: string; content: string; characterId?: string; stage?: Stage }) => Promise<Card>
   edit: (
     id: string,
-    patch: Partial<Pick<Card, 'content' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order'>>,
+    patch: Partial<Pick<Card, 'title' | 'content' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order'>>,
   ) => Promise<void>
   remove: (id: string) => Promise<void>
   setFilter: (characterId: string | null) => void

@@ -55,7 +55,10 @@ export function CardDetailModal({
             ×
           </button>
         </div>
-        <p className="whitespace-pre-wrap rounded bg-ink-50 p-3 text-sm">{card.content}</p>
+        <h3 className="mb-2 text-lg font-semibold text-ink-800">{card.title || '（无标题）'}</h3>
+        {card.content && (
+          <p className="whitespace-pre-wrap rounded bg-ink-50 p-3 text-sm">{card.content}</p>
+        )}
         <div className="mt-3 flex flex-wrap gap-2 text-xs text-ink-500">
           {characterName && <span>#{characterName}</span>}
           <span>创建于 {new Date(card.createdAt).toLocaleString()}</span>
