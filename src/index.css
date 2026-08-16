@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: '宋体', 'SimSun', sans-serif;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: #0d0d0d;
+}
+
+* {
+  box-sizing: border-box;
+}
