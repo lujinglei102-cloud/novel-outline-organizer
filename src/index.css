@@ -2,76 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========== 深色模式（默认·像素赛博） ========== */
+/* =====================================================
+   可爱灵动 · 低饱和紫蓝配色
+   设计原则：
+   - 低饱和 HSL：S ≤ 35%，避免艳俗
+   - 文字对比度 ≥ 8:1（深色模式 L≥88%）
+   - 柔和圆角 8-12px，细边框 1px，柔和阴影
+   - 字体：ZCOOL KuaiLe（可爱标题）+ Noto Sans SC（正文）
+   - 彻底废弃金色/黄色元素
+   ===================================================== */
+
+/* ========== 深色模式（默认·柔和紫蓝） ========== */
 :root {
-  /* Press Start 2P 用于标题像素字，VT323 用于英文数字，宋体用于中文 */
-  font-family: 'VT323', '宋体', 'SimSun', sans-serif;
+  font-family: 'Noto Sans SC', 'ZCOOL KuaiLe', system-ui, sans-serif;
   color-scheme: dark;
 
-  /* 深色模式：保证文字对比度 ≥ 7:1 */
-  --ink-50: 10 11 46;
-  --ink-100: 25 24 80;
-  --ink-200: 40 37 120;
-  --ink-300: 80 70 180;
-  --ink-400: 180 190 255;   /* 提亮：用于 text-ink-400 次要说明 */
-  --ink-500: 210 220 255;   /* 提亮：用于 text-ink-500 普通文字 */
-  --ink-600: 230 235 255;   /* 提亮：用于 text-ink-600 正文 */
-  --ink-700: 245 245 255;   /* 提亮：用于 text-ink-700 主文字 */
-  --ink-800: 252 252 255;   /* 提亮：用于 text-ink-800 标题 */
-  --ink-900: 255 255 255;   /* 最亮：用于 text-ink-900 最高标题 */
+  /* Deep indigo-violet background, low saturation */
+  --ink-50: 14 14 38;       /* #0E0E26 最深背景 */
+  --ink-100: 22 22 52;      /* #161634 */
+  --ink-200: 32 32 66;      /* #202042 卡片底 */
+  --ink-300: 45 45 82;      /* #2D2D52 边框深 */
+  --ink-400: 140 148 200;   /* #8C94C8 次要文字（提亮） */
+  --ink-500: 170 178 218;   /* #AAB2DA 普通文字 */
+  --ink-600: 200 206 232;   /* #C8CEE8 中等文字 */
+  --ink-700: 225 228 244;   /* #E1E4F4 主文字 */
+  --ink-800: 240 242 252;   /* #F0F2FC 标题文字 */
+  --ink-900: 252 253 255;   /* #FCFDFF 最亮文字 */
 
-  --bg-gradient: linear-gradient(180deg, #0A0B2E 0%, #1A1860 50%, #2D1F80 100%);
-  --bg-color: #0A0B2E;
-  --text-color: #F5F5FF;
-  --surface-bg: rgba(20, 18, 60, 0.92);
-  --surface-border: #6366F1;
-  --modal-bg: rgba(15, 14, 50, 0.97);
-  --modal-border: #A855F7;
-  --btn-gradient: linear-gradient(180deg, #7C3AED, #4C1D95);
-  --btn-border: #FBBF24;
-  --btn-text: #FFFFFF;
-  --btn-glow: rgba(168, 85, 247, 0.7);
-  --input-bg: rgba(10, 11, 46, 0.9);
-  --input-border: #6366F1;
-  --input-focus: #22D3EE;
-  --scanline-opacity: 0.3;
-  --pixel-grid-opacity: 1;
+  /* Accent: low-saturation */
+  --accent-magenta: 196 139 223;    /* #C48BDF 柔和紫红 */
+  --accent-periwinkle: 143 165 232; /* #8FA5E8 柔和紫蓝 */
+
+  /* Semantic: soft, not bright */
+  --semantic-success: 141 223 187;   /* #8DDFBB */
+  --semantic-warning: 232 199 138;   /* #E8C78A */
+  --semantic-error: 232 160 160;     /* #E8A0A0 */
+
+  /* Component tokens */
+  --bg-gradient: linear-gradient(170deg, #0E0E26 0%, #161634 40%, #202042 100%);
+  --bg-color: #0E0E26;
+  --text-color: #F0F2FC;
+  --surface-bg: rgba(32, 32, 66, 0.85);
+  --surface-border: rgba(140, 148, 200, 0.35);
+  --surface-hover: rgba(140, 148, 200, 0.15);
+  --modal-bg: rgba(22, 22, 52, 0.97);
+  --modal-border: rgba(143, 165, 232, 0.5);
+  --btn-bg: linear-gradient(135deg, #8FA5E8 0%, #C48BDF 100%);
+  --btn-bg-hover: linear-gradient(135deg, #A5B8F0 0%, #D4A5E8 100%);
+  --btn-text: #161634;
+  --btn-shadow: 0 4px 14px rgba(143, 165, 232, 0.35);
+  --input-bg: rgba(14, 14, 38, 0.6);
+  --input-border: rgba(140, 148, 200, 0.4);
+  --input-focus: rgba(196, 139, 223, 0.6);
 }
 
 /* ========== 浅色模式 ========== */
 .light-mode {
   color-scheme: light;
 
-  --ink-50: 247 247 247;
-  --ink-100: 237 237 237;
-  --ink-200: 217 217 217;
-  --ink-300: 191 191 191;
-  --ink-400: 120 120 120;
-  --ink-500: 80 80 80;
-  --ink-600: 60 60 60;
-  --ink-700: 40 40 40;
-  --ink-800: 25 25 25;
-  --ink-900: 10 10 10;
+  --ink-50: 248 248 250;
+  --ink-100: 240 240 244;
+  --ink-200: 228 228 236;
+  --ink-300: 210 210 222;
+  --ink-400: 130 135 155;
+  --ink-500: 100 105 125;
+  --ink-600: 75 80 100;
+  --ink-700: 55 58 75;
+  --ink-800: 35 38 55;
+  --ink-900: 20 22 35;
+
+  --accent-magenta: 160 100 180;
+  --accent-periwinkle: 100 125 200;
+
+  --semantic-success: 50 150 100;
+  --semantic-warning: 180 130 50;
+  --semantic-error: 180 80 80;
 
   --bg-gradient: none;
-  --bg-color: #ffffff;
-  --text-color: #1a1a1a;
-  --surface-bg: #ffffff;
-  --surface-border: #d9d9d9;
-  --modal-bg: #ffffff;
-  --modal-border: #bfbfbf;
-  --btn-gradient: linear-gradient(180deg, #1f1f1f, #0d0d0d);
-  --btn-border: #facc15;
-  --btn-text: #ffffff;
-  --btn-glow: rgba(0, 0, 0, 0.15);
-  --input-bg: #ffffff;
-  --input-border: #bfbfbf;
-  --input-focus: #6366F1;
-  --scanline-opacity: 0;
-  --pixel-grid-opacity: 0;
+  --bg-color: #FAFAFC;
+  --text-color: #232637;
+  --surface-bg: #FFFFFF;
+  --surface-border: #E4E4EC;
+  --surface-hover: #F2F2F8;
+  --modal-bg: #FFFFFF;
+  --modal-border: #D4D4DE;
+  --btn-bg: linear-gradient(135deg, #6478C8 0%, #A064B4 100%);
+  --btn-bg-hover: linear-gradient(135deg, #7488D8 0%, #B074C4 100%);
+  --btn-text: #FFFFFF;
+  --btn-shadow: 0 4px 12px rgba(100, 120, 200, 0.25);
+  --input-bg: #FFFFFF;
+  --input-border: #D4D4DE;
+  --input-focus: rgba(160, 100, 180, 0.5);
 }
 
-/* ========== @layer base：文字强制兜底 ========== */
+/* ========== @layer base ========== */
 @layer base {
   body {
     margin: 0;
@@ -80,24 +104,31 @@
     color: var(--text-color);
     min-height: 100vh;
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.65;
+    letter-spacing: 0.02em;
   }
 
   p, span, div, label, li, h1, h2, h3, h4, h5, h6 {
     color: inherit;
   }
 
-  /* 所有输入框的文字颜色 */
   input, textarea, select {
     color: var(--text-color);
   }
 
   input::placeholder, textarea::placeholder {
-    color: rgb(var(--ink-400) / 0.8);
+    color: rgb(var(--ink-400));
+    opacity: 0.7;
   }
 
   pre {
     color: var(--text-color);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -105,299 +136,253 @@
   box-sizing: border-box;
 }
 
-/* ========== 像素网格背景（替代星空，参考用户像素游戏图） ========== */
+/* ========== 背景装饰：柔和渐变+细腻星点 ========== */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9999;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.05) 0px,
-    rgba(0, 0, 0, 0.05) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  opacity: var(--scanline-opacity);
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
   z-index: 0;
-  opacity: var(--pixel-grid-opacity);
-  background-image:
-    /* 像素网格：每 8px 一个点阵 */
-    radial-gradient(1px 1px at 4px 4px, rgba(99, 102, 241, 0.25), transparent),
-    radial-gradient(1px 1px at 12px 12px, rgba(168, 85, 247, 0.18), transparent),
-    /* 左上角金色像素装饰 */
-    radial-gradient(2px 2px at 24px 24px, rgba(251, 191, 36, 0.25), transparent),
-    /* 星点 */
-    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.5), transparent),
-    radial-gradient(2px 2px at 60% 70%, rgba(34, 211, 238, 0.35), transparent),
-    radial-gradient(2px 2px at 80% 20%, rgba(236, 72, 153, 0.3), transparent),
-    radial-gradient(1px 1px at 90% 85%, rgba(251, 191, 36, 0.4), transparent),
-    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.3), transparent),
-    /* 水平像素云纹（参考游戏图片底部紫色云块） */
-    linear-gradient(180deg,
-      transparent 85%,
-      rgba(168, 85, 247, 0.08) 95%,
-      rgba(99, 102, 241, 0.12) 100%);
-  background-size: 16px 16px, 16px 16px, 32px 32px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(196, 139, 223, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(143, 165, 232, 0.08) 0%, transparent 50%),
+    radial-gradient(1px 1px at 30% 30%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 60% 60%, rgba(255, 255, 255, 0.25), transparent),
+    radial-gradient(1px 1px at 80% 20%, rgba(255, 255, 255, 0.3), transparent);
+  background-size: 100% 100%, 100% 100%, 180px 180px, 220px 220px, 200px 200px;
+  opacity: 1;
 }
 
-/* ========== 霓虹文字光晕 ========== */
+.light-mode body::before {
+  background: none;
+}
+
+/* ========== 可爱光晕文字 ========== */
 .neon-text {
-  text-shadow: 0 0 10px rgba(168, 85, 247, 0.9), 0 0 20px rgba(168, 85, 247, 0.5), 0 0 2px rgba(255,255,255,0.3);
+  text-shadow: 0 0 12px rgba(196, 139, 223, 0.45), 0 0 24px rgba(196, 139, 223, 0.2);
 }
 .light-mode .neon-text {
-  text-shadow: none;
+  text-shadow: 0 1px 2px rgba(100, 120, 200, 0.15);
 }
 
 .neon-text-cyan {
-  text-shadow: 0 0 10px rgba(34, 211, 238, 0.9), 0 0 20px rgba(34, 211, 238, 0.5);
+  text-shadow: 0 0 12px rgba(143, 165, 232, 0.45), 0 0 24px rgba(143, 165, 232, 0.2);
 }
 .light-mode .neon-text-cyan {
-  text-shadow: none;
+  text-shadow: 0 1px 2px rgba(100, 120, 200, 0.15);
 }
 
 .neon-text-gold {
-  text-shadow: 0 0 10px rgba(251, 191, 36, 0.9), 0 0 20px rgba(251, 191, 36, 0.5);
+  text-shadow: 0 0 12px rgba(232, 199, 138, 0.45), 0 0 24px rgba(232, 199, 138, 0.2);
 }
 .light-mode .neon-text-gold {
-  text-shadow: none;
+  text-shadow: 0 1px 2px rgba(180, 130, 50, 0.15);
 }
 
-/* ========== 像素风按钮（硬边框 + 阴影偏移，不用模糊光晕） ========== */
+/* ========== 柔和按钮（圆角+渐变+柔光阴影） ========== */
 .cyber-btn {
-  background: var(--btn-gradient);
-  border: 3px solid var(--btn-border);
+  background: var(--btn-bg);
+  border: none;
   color: var(--btn-text);
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
-  box-shadow:
-    3px 3px 0 rgba(0, 0, 0, 0.5),
-    inset 1px 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 80ms ease;
-  image-rendering: pixelated;
+  text-shadow: none;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  box-shadow: var(--btn-shadow);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .cyber-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.5),
-    0 0 0 2px rgba(251, 191, 36, 0.3),
-    inset 1px 1px 0 rgba(255, 255, 255, 0.3);
-}
-.light-mode .cyber-btn:hover:not(:disabled) {
-  box-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.2),
-    0 0 0 2px rgba(250, 204, 21, 0.4),
-    inset 1px 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--btn-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(143, 165, 232, 0.45);
 }
 .cyber-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow:
-    1px 1px 0 rgba(0, 0, 0, 0.5),
-    inset 1px 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(143, 165, 232, 0.3);
 }
 .cyber-btn:disabled {
   opacity: 0.4;
-  filter: grayscale(0.5);
+  cursor: not-allowed;
 }
 
-/* ========== 像素卡片表面（硬边框 + 偏移阴影，不 blur） ========== */
+/* ========== 柔和卡片表面 ========== */
 .cyber-surface {
   background: var(--surface-bg);
-  border: 2px solid var(--surface-border);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
   box-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.35),
-    inset 0 0 0 1px rgba(168, 85, 247, 0.15);
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(143, 165, 232, 0.08);
 }
 .light-mode .cyber-surface {
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* ========== 像素弹窗（霓虹粗边框 + 偏移阴影） ========== */
+/* ========== 柔和弹窗 ========== */
 .cyber-modal {
   background: var(--modal-bg);
-  border: 3px solid var(--modal-border);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--modal-border);
+  border-radius: 16px;
   box-shadow:
-    6px 6px 0 rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(251, 191, 36, 0.25);
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(196, 139, 223, 0.1);
 }
 .light-mode .cyber-modal {
-  border: 2px solid var(--surface-border);
-  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
-/* ========== 霓虹边框 ========== */
+/* ========== 柔和边框 ========== */
 .neon-border {
-  border: 2px solid #A855F7;
-  box-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.3),
-    0 0 12px rgba(168, 85, 247, 0.4);
+  border: 1px solid rgba(196, 139, 223, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(196, 139, 223, 0.15);
 }
 .light-mode .neon-border {
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 8px rgba(160, 100, 180, 0.1);
 }
 
-/* ========== 像素输入框 ========== */
+/* ========== 柔和输入框 ========== */
 .cyber-input {
   background: var(--input-bg);
-  border: 2px solid var(--input-border);
+  border: 1px solid var(--input-border);
   color: var(--text-color);
-  transition: border-color 100ms, box-shadow 100ms;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: all 180ms ease;
 }
 .cyber-input:focus {
   border-color: var(--input-focus);
-  box-shadow:
-    0 0 0 2px rgba(34, 211, 238, 0.25),
-    0 0 10px rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 0 3px rgba(196, 139, 223, 0.15);
   outline: none;
 }
-.cyber-input::placeholder {
-  color: rgb(var(--ink-400));
-  opacity: 0.65;
-}
 
-/* ========== Tab 激活态（像素感） ========== */
+/* ========== Tab 激活态 ========== */
 .cyber-tab-active {
-  background: var(--btn-gradient);
+  background: var(--btn-bg);
   color: var(--btn-text);
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
-  border: 2px solid var(--btn-border);
-  box-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  font-weight: 600;
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  box-shadow: 0 3px 10px rgba(143, 165, 232, 0.3);
 }
 .light-mode .cyber-tab-active {
-  text-shadow: none;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 10px rgba(100, 120, 200, 0.2);
 }
 
-/* ========== 四色像素徽章（替代硬编码 amber/green/red/purple/gray） ========== */
+/* ========== 柔和徽章 ========== */
 .pixel-badge {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px 8px;
-  border-radius: 0;
-  border: 2px solid;
-  font-size: 11px;
-  font-weight: 600;
-  image-rendering: pixelated;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  transition: all 180ms ease;
 }
 .pixel-badge-green {
-  background: #064E3B;
-  border-color: #10B981;
-  color: #6EE7B7;
+  background: rgba(141, 223, 187, 0.15);
+  border-color: rgba(141, 223, 187, 0.4);
+  color: rgb(var(--semantic-success));
 }
 .light-mode .pixel-badge-green {
-  background: #ECFDF5;
-  border-color: #059669;
-  color: #065F46;
+  background: rgba(50, 150, 100, 0.1);
+  color: rgb(var(--semantic-success));
 }
 .pixel-badge-amber {
-  background: #78350F;
-  border-color: #F59E0B;
-  color: #FCD34D;
+  background: rgba(232, 199, 138, 0.15);
+  border-color: rgba(232, 199, 138, 0.4);
+  color: rgb(var(--semantic-warning));
 }
 .light-mode .pixel-badge-amber {
-  background: #FFFBEB;
-  border-color: #D97706;
-  color: #92400E;
+  background: rgba(180, 130, 50, 0.1);
+  color: rgb(var(--semantic-warning));
 }
 .pixel-badge-red {
-  background: #7F1D1D;
-  border-color: #EF4444;
-  color: #FCA5A5;
+  background: rgba(232, 160, 160, 0.15);
+  border-color: rgba(232, 160, 160, 0.4);
+  color: rgb(var(--semantic-error));
 }
 .light-mode .pixel-badge-red {
-  background: #FEF2F2;
-  border-color: #DC2626;
-  color: #991B1B;
+  background: rgba(180, 80, 80, 0.1);
+  color: rgb(var(--semantic-error));
 }
 .pixel-badge-purple {
-  background: #4C1D95;
-  border-color: #A855F7;
-  color: #D8B4FE;
+  background: rgba(196, 139, 223, 0.15);
+  border-color: rgba(196, 139, 223, 0.4);
+  color: rgb(var(--accent-magenta));
 }
 .light-mode .pixel-badge-purple {
-  background: #FAF5FF;
-  border-color: #9333EA;
-  color: #6B21A8;
+  background: rgba(160, 100, 180, 0.1);
+  color: rgb(var(--accent-magenta));
 }
 .pixel-badge-gray {
-  background: rgb(var(--ink-200));
-  border-color: rgb(var(--ink-400));
-  color: rgb(var(--ink-700));
+  background: rgba(140, 148, 200, 0.12);
+  border-color: rgba(140, 148, 200, 0.35);
+  color: rgb(var(--ink-500));
 }
 .light-mode .pixel-badge-gray {
-  background: #F5F5F5;
-  border-color: #A3A3A3;
-  color: #404040;
+  background: rgba(100, 105, 125, 0.08);
+  color: rgb(var(--ink-600));
 }
 
-/* ========== 像素节点徽章（OutlinePage 节点序号） ========== */
+/* ========== 柔和节点徽章 ========== */
 .pixel-node-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  background: var(--btn-gradient);
-  border: 2px solid var(--btn-border);
+  padding: 3px 12px;
+  background: var(--btn-bg);
   color: var(--btn-text);
-  font-size: 11px;
-  font-weight: 700;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
-}
-.light-mode .pixel-node-badge {
-  text-shadow: none;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  box-shadow: 0 2px 8px rgba(143, 165, 232, 0.3);
 }
 
-/* ========== 像素 Tooltip ========== */
+/* ========== 柔和 Tooltip ========== */
 .pixel-tooltip {
-  background: #4C1D95 !important;
-  border: 2px solid #FBBF24 !important;
-  color: #FFFFFF !important;
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5) !important;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6) !important;
-  border-radius: 0 !important;
+  background: rgba(22, 22, 52, 0.95) !important;
+  border: 1px solid rgba(143, 165, 232, 0.4) !important;
+  color: rgb(var(--ink-800)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  padding: 8px 14px !important;
+  font-size: 12px !important;
 }
 .light-mode .pixel-tooltip {
-  background: #1f2937 !important;
-  border-color: #374151 !important;
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2) !important;
-  text-shadow: none !important;
+  background: #2d2d44 !important;
+  border-color: #4a4a6a !important;
+  color: #f0f0f8 !important;
 }
 
-/* ========== 滚动条（像素感） ========== */
+/* ========== 滚动条 ========== */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgb(var(--ink-50));
-  border-left: 2px solid rgb(var(--ink-200));
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--btn-gradient);
-  border: 2px solid var(--btn-border);
+  background: rgba(143, 165, 232, 0.3);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #8B5CF6, #6366F1);
+  background: rgba(143, 165, 232, 0.5);
 }
 
-/* ========== 像素字体工具类 ========== */
-.font-pixel {
-  font-family: '"Press Start 2P"', 'VT323', '宋体', monospace;
-  letter-spacing: 0.5px;
-}
-.font-retro {
-  font-family: '"VT323"', '宋体', monospace;
-  letter-spacing: 0.3px;
+/* ========== 可爱字体工具类 ========== */
+.font-cute {
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  letter-spacing: 0.05em;
 }
 
 /* ========== 禁用动画 ========== */

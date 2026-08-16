@@ -87,7 +87,7 @@ export function OutlinePage() {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold">阶段三 · 骨架 & 章节</h1>
+          <h1 className="text-lg font-semibold font-cute">阶段三 · 骨架 & 章节</h1>
           <p className="text-xs text-ink-400">
             用结构模板构建故事骨架，生成章节规划，每章自动分配冲突卡片
           </p>
@@ -118,7 +118,7 @@ export function OutlinePage() {
           {/* 方向（模板）选择 */}
           <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-ink-800 neon-text">① 骨架方向（按模板自动分界）</h2>
+              <h2 className="text-sm font-semibold font-cute text-ink-800 neon-text">① 骨架方向（按模板自动分界）</h2>
               <button
                 onClick={() => runSkeletonDirections()}
                 className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50"
@@ -192,7 +192,7 @@ export function OutlinePage() {
 
           {/* 结构节点编辑器（可改名/加/删） */}
           <section className="rounded border border-ink-300 cyber-surface p-4">
-            <h2 className="mb-2 text-sm font-semibold text-ink-800 neon-text">
+            <h2 className="mb-2 text-sm font-semibold font-cute text-ink-800 neon-text">
               ② 结构节点（可改名/增删，对应起承转合等）
             </h2>
             <StructureNodesEditor
@@ -217,7 +217,7 @@ export function OutlinePage() {
           {/* 情绪曲线（含理想曲线对比） */}
           <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-ink-800 neon-text">
+              <h2 className="text-sm font-semibold font-cute text-ink-800 neon-text">
                 ③ 情绪冲突曲线：情绪值 + 冲突强度
               </h2>
               <button
@@ -248,7 +248,7 @@ export function OutlinePage() {
           {/* 生成章节 */}
           <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="text-sm font-semibold text-ink-800 neon-text mr-auto">
+              <h2 className="text-sm font-semibold font-cute text-ink-800 neon-text mr-auto">
                 ④ 章节规划（每个节点生成 N 章）
               </h2>
               <label className="flex items-center gap-1 text-xs text-ink-500">
@@ -327,7 +327,7 @@ export function OutlinePage() {
             className="w-full max-w-lg rounded cyber-modal p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-3 text-base font-semibold neon-text">
+            <h3 className="mb-3 text-base font-semibold font-cute neon-text">
               编辑章节 · 第 {editingChapter.index + 1} 章 · {editingChapter.nodeId}
             </h3>
             <label className="mb-1 block text-xs text-ink-500">章节标题</label>
@@ -468,7 +468,7 @@ function ChapterEmotionForeshadowModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-semibold neon-text">
+          <h3 className="text-base font-semibold font-cute neon-text">
             📊 第 {chapter.index + 1} 章 · 情绪起伏与伏笔标注
           </h3>
           <button onClick={onClose} className="text-ink-400 hover:text-ink-700">
@@ -502,14 +502,14 @@ function ChapterEmotionForeshadowModal({
 
             {/* 情绪曲线 */}
             <div className="mb-4">
-              <h4 className="mb-2 text-sm font-semibold text-ink-700 neon-text">情绪起伏曲线</h4>
+              <h4 className="mb-2 text-sm font-semibold font-cute text-ink-700 neon-text">情绪起伏曲线</h4>
               <EmotionCurve xLabels={xLabels} values={stats.emotions} conflictValues={stats.intensities} height={240} />
             </div>
 
             {/* 伏笔标注 */}
             <div className="mb-2">
               <div className="mb-2 flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-ink-700 neon-text">🔖 伏笔标注</h4>
+                <h4 className="text-sm font-semibold font-cute text-ink-700 neon-text">🔖 伏笔标注</h4>
                 {foreshadowCards.length > 0 && (
                   <span className="text-xs text-ink-500">
                     共 {foreshadowCards.length} 条
@@ -561,7 +561,7 @@ function ChapterEmotionForeshadowModal({
 
             {/* 卡片情绪明细 */}
             <div>
-              <h4 className="mb-2 text-sm font-semibold text-ink-700 neon-text">卡片情绪明细</h4>
+              <h4 className="mb-2 text-sm font-semibold font-cute text-ink-700 neon-text">卡片情绪明细</h4>
               <ul className="space-y-1">
                 {cards.map((c, i) => (
                   <li key={c.id} className="flex items-center gap-2 rounded bg-ink-100/50 p-1.5 text-xs">

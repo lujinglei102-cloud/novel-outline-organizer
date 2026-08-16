@@ -37,7 +37,7 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <button
             onClick={() => navigate('/cards')}
-            className="text-sm font-bold font-pixel text-ink-900 hover:text-ink-700 neon-text"
+            className="text-sm font-bold font-cute text-ink-800 hover:text-ink-600 neon-text"
           >
             小说大纲梳理器
           </button>

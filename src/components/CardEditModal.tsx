@@ -61,7 +61,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold neon-text">
+          <h2 className="text-base font-semibold font-cute neon-text">
             {initial ? '编辑灵感卡片' : '新建灵感卡片'}
           </h2>
           <button onClick={onCancel} className="text-ink-400 hover:text-ink-700">

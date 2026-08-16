@@ -81,7 +81,7 @@ export function SortPage() {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold">阶段二 · 一键梳理</h1>
+          <h1 className="text-lg font-semibold font-cute">阶段二 · 一键梳理</h1>
           <p className="text-xs text-ink-400">
             按叙事线、角色、伏笔、情绪四个维度整理你的灵感卡片
           </p>
@@ -474,7 +474,7 @@ function CharactersView({
         <section className="lg:col-span-2">
           {selChar ? (
             <>
-              <h3 className="mb-2 text-base font-semibold neon-text">{selChar.name} 的出场卡片</h3>
+              <h3 className="mb-2 text-base font-semibold font-cute neon-text">{selChar.name} 的出场卡片</h3>
               {relatedCards.length === 0 ? (
                 <p className="rounded border border-dashed border-ink-300 p-6 text-center text-sm text-ink-500">
                   该角色暂未分配卡片
@@ -545,7 +545,7 @@ function ForeshadowView({
       {/* 手动标记的伏笔 */}
       {manualForeshadowCards.length > 0 && (
         <div className="mb-4">
-          <h3 className="mb-2 text-sm font-semibold text-purple-400 neon-text">🔖 手动标记的伏笔</h3>
+          <h3 className="mb-2 text-sm font-semibold font-cute text-purple-400 neon-text">🔖 手动标记的伏笔</h3>
           <ul className="space-y-2">
             {manualForeshadowCards.map((c) => {
               const resolved = c.foreshadowResolved
@@ -581,7 +581,7 @@ function ForeshadowView({
       )}
 
       {/* 自动识别的伏笔关联 */}
-      <h3 className="mb-2 text-sm font-semibold text-ink-600">🔗 自动关联</h3>
+      <h3 className="mb-2 text-sm font-semibold font-cute text-ink-600">🔗 自动关联</h3>
       {visible.length === 0 ? (
         <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-500">
           暂未发现伏笔关联，尝试在卡片中加入共同的信物或关键词（如玉佩、日记、项链等）。
@@ -828,7 +828,7 @@ function EditEmotionDialog({
         className="w-full max-w-md rounded cyber-modal p-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-4 text-base font-semibold neon-text">修改情绪标注</h3>
+        <h3 className="mb-4 text-base font-semibold font-cute neon-text">修改情绪标注</h3>
         <div className="mb-3">
           <label className="mb-1 block text-xs text-ink-500">
             情绪值：{e}（-5 极度负面 / 0 中性 / 5 极度正面）

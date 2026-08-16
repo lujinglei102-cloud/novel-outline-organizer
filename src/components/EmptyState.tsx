@@ -50,12 +50,12 @@ export function CardDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold neon-text">卡片详情</h2>
+          <h2 className="text-base font-semibold font-cute neon-text">卡片详情</h2>
           <button onClick={onClose} className="text-ink-400 hover:text-ink-700">
             ×
           </button>
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-ink-800 neon-text">{card.title || '（无标题）'}</h3>
+        <h3 className="mb-2 text-lg font-semibold font-cute text-ink-800 neon-text">{card.title || '（无标题）'}</h3>
         {card.content && (
           <p className="whitespace-pre-wrap rounded bg-ink-100/50 p-3 text-sm">{card.content}</p>
         )}

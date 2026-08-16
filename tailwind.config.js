@@ -4,12 +4,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"VT323"', '"宋体"', '"SimSun"', 'sans-serif'],
-        pixel: ['"Press Start 2P"', '"宋体"', 'monospace'],
-        retro: ['"VT323"', '"宋体"', 'monospace'],
+        sans: ['"Noto Sans SC"', '"ZCOOL KuaiLe"', 'system-ui', 'sans-serif'],
+        cute: ['"ZCOOL KuaiLe"', '"Noto Sans SC"', 'sans-serif'],
       },
       colors: {
-        // 使用 CSS 变量，支持深色/浅色双主题切换
         ink: {
           50: 'rgb(var(--ink-50) / <alpha-value>)',
           100: 'rgb(var(--ink-100) / <alpha-value>)',
@@ -22,23 +20,19 @@ export default {
           800: 'rgb(var(--ink-800) / <alpha-value>)',
           900: 'rgb(var(--ink-900) / <alpha-value>)',
         },
-        neon: {
-          purple: '#A855F7',
-          cyan: '#22D3EE',
-          magenta: '#EC4899',
-          gold: '#FBBF24',
-          green: '#10B981',
-          red: '#EF4444',
+        accent: {
+          magenta: 'rgb(var(--accent-magenta) / <alpha-value>)',
+          periwinkle: 'rgb(var(--accent-periwinkle) / <alpha-value>)',
+        },
+        semantic: {
+          success: 'rgb(var(--semantic-success) / <alpha-value>)',
+          warning: 'rgb(var(--semantic-warning) / <alpha-value>)',
+          error: 'rgb(var(--semantic-error) / <alpha-value>)',
         },
       },
       screens: {
         sm: '768px',
         lg: '1024px',
-      },
-      boxShadow: {
-        'neon-purple': '0 0 8px rgba(168,85,247,0.6), 0 0 16px rgba(168,85,247,0.3)',
-        'neon-cyan': '0 0 8px rgba(34,211,238,0.6), 0 0 16px rgba(34,211,238,0.3)',
-        'neon-blue': '0 0 8px rgba(99,102,241,0.6), 0 0 16px rgba(99,102,241,0.3)',
       },
     },
   },

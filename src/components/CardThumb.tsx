@@ -39,7 +39,7 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       className="cursor-pointer rounded border border-ink-300 cyber-surface p-3 transition hover:-translate-y-0.5 hover:shadow-md"
     >
       {/* 标题 */}
-      <p className="mb-1 text-xs font-semibold text-ink-900 neon-text line-clamp-1 font-pixel">
+      <p className="mb-1 text-sm font-semibold text-ink-800 neon-text line-clamp-1 font-cute">
         {displayTitle}
       </p>
 
