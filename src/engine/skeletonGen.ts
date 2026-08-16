@@ -144,3 +144,47 @@ export function splitIntoChapters(
   }
   return chapters
 }
+
+/**
+ * 章节情绪与伏笔统计：根据章节内的卡片计算情绪概览和伏笔标注。
+ * 用于「章节情绪起伏 + 伏笔标注」查看面板。
+ */
+export interface ChapterStats {
+  cardCount: number
+  emotions: number[]
+  intensities: number[]
+  avgEmotion: number
+  maxEmotion: number
+  minEmotion: number
+  foreshadowCards: { id: string; title: string; content: string; resolved: boolean }[]
+  foreshadowCount: number
+  unresolvedForeshadowCount: number
+}
+
+export function computeChapterStats(
+  cards: { id: string; title?: string; content: string; emotion?: number; intensity?: number; isForeshadow?: boolean; foreshadowResolved?: boolean }[],
+): ChapterStats {
+  const emotions = cards.map((c) => c.emotion ?? 0)
+  const intensities = cards.map((c) => c.intensity ?? 1)
+  const foreshadowCards = cards
+    .filter((c) => c.isForeshadow)
+    .map((c) => ({
+      id: c.id,
+      title: c.title?.trim() || '（无标题）',
+      content: c.content,
+      resolved: !!c.foreshadowResolved,
+    }))
+
+  const sum = emotions.reduce((a, b) => a + b, 0)
+  return {
+    cardCount: cards.length,
+    emotions,
+    intensities,
+    avgEmotion: emotions.length > 0 ? Math.round((sum / emotions.length) * 10) / 10 : 0,
+    maxEmotion: emotions.length > 0 ? Math.max(...emotions) : 0,
+    minEmotion: emotions.length > 0 ? Math.min(...emotions) : 0,
+    foreshadowCards,
+    foreshadowCount: foreshadowCards.length,
+    unresolvedForeshadowCount: foreshadowCards.filter((f) => !f.resolved).length,
+  }
+}

@@ -5,7 +5,19 @@ import { useSortStore } from '@/stores/sortStore'
 import { StructureNodesEditor } from '@/components/StructureNodesEditor'
 import { CardThumb } from '@/components/CardThumb'
 import { EmotionCurve } from '@/components/EmotionCurve'
+import { computeChapterStats } from '@/engine/skeletonGen'
 import type { Chapter } from '@/types'
+
+// 章节卡片视图所需字段
+interface ChapterCardData {
+  id: string
+  title?: string
+  content: string
+  emotion?: number
+  intensity?: number
+  isForeshadow?: boolean
+  foreshadowResolved?: boolean
+}
 
 export function OutlinePage() {
   const navigate = useNavigate()
@@ -32,6 +44,7 @@ export function OutlinePage() {
   const [editingChapter, setEditingChapter] = useState<Chapter | null>(null)
   const [draftTitle, setDraftTitle] = useState('')
   const [draftConflict, setDraftConflict] = useState('')
+  const [viewingChapter, setViewingChapter] = useState<Chapter | null>(null)
 
   useEffect(() => {
     ;(async () => {
@@ -280,12 +293,13 @@ export function OutlinePage() {
                             <ChapterCard
                               key={ch.id}
                               chapter={ch}
-                              sortedCards={sortedCards as any}
+                              sortedCards={sortedCards as ChapterCardData[]}
                               onEdit={() => {
                                 setEditingChapter(ch)
                                 setDraftTitle(ch.title)
                                 setDraftConflict(ch.conflict)
                               }}
+                              onViewEmotion={() => setViewingChapter(ch)}
                             />
                           ))}
                         </div>
@@ -349,6 +363,14 @@ export function OutlinePage() {
           </div>
         </div>
       )}
+
+      {viewingChapter && (
+        <ChapterEmotionForeshadowModal
+          chapter={viewingChapter}
+          sortedCards={sortedCards as ChapterCardData[]}
+          onClose={() => setViewingChapter(null)}
+        />
+      )}
     </div>
   )
 }
@@ -364,14 +386,17 @@ function ChapterCard({
   chapter,
   sortedCards,
   onEdit,
+  onViewEmotion,
 }: {
   chapter: Chapter
-  sortedCards: { id: string; content: string }[]
+  sortedCards: ChapterCardData[]
   onEdit: () => void
+  onViewEmotion: () => void
 }) {
   const cards = chapter.cardIds
     .map((id) => sortedCards.find((c) => c.id === id))
-    .filter(Boolean) as { id: string; content: string }[]
+    .filter(Boolean) as ChapterCardData[]
+  const foreshadowCount = cards.filter((c) => c.isForeshadow).length
   return (
     <div className="rounded border border-ink-200 bg-ink-50/40 p-3">
       <div className="mb-2 flex items-start gap-3">
@@ -382,6 +407,13 @@ function ChapterCard({
           <div className="text-sm font-semibold">{chapter.title}</div>
           <div className="mt-0.5 text-xs text-ink-500">{chapter.conflict}</div>
         </div>
+        <button
+          onClick={onViewEmotion}
+          className="rounded border border-ink-200 px-2 py-0.5 text-xs hover:bg-ink-50"
+          title="查看本章情绪起伏与伏笔标注"
+        >
+          📊 情绪/伏笔
+        </button>
         <button
           onClick={onEdit}
           className="rounded border border-ink-200 px-2 py-0.5 text-xs hover:bg-ink-50"
@@ -396,6 +428,169 @@ function ChapterCard({
           ))}
         </div>
       )}
+      {foreshadowCount > 0 && (
+        <div className="mt-2 text-xs text-purple-600">🔖 本章含 {foreshadowCount} 条伏笔标注</div>
+      )}
+    </div>
+  )
+}
+
+function ChapterEmotionForeshadowModal({
+  chapter,
+  sortedCards,
+  onClose,
+}: {
+  chapter: Chapter
+  sortedCards: ChapterCardData[]
+  onClose: () => void
+}) {
+  const cards = chapter.cardIds
+    .map((id) => sortedCards.find((c) => c.id === id))
+    .filter(Boolean) as ChapterCardData[]
+
+  const stats = computeChapterStats(cards)
+  const xLabels = cards.map((c, i) => c.title?.trim() || `卡${i + 1}`)
+  const { avgEmotion, maxEmotion, minEmotion, foreshadowCards, unresolvedForeshadowCount: unresolvedCount } = stats
+
+  return (
+    <div
+      data-testid="chapter-emotion-modal"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded bg-white p-5 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-base font-semibold">
+            📊 第 {chapter.index + 1} 章 · 情绪起伏与伏笔标注
+          </h3>
+          <button onClick={onClose} className="text-ink-400 hover:text-ink-700">
+            ×
+          </button>
+        </div>
+
+        <div className="mb-2 text-xs text-ink-500">
+          章节标题：{chapter.title} · 所属节点：{chapter.nodeId} · 含 {cards.length} 张卡片
+        </div>
+
+        {cards.length === 0 ? (
+          <p className="py-8 text-center text-sm text-ink-400">本章暂无卡片</p>
+        ) : (
+          <>
+            {/* 情绪统计概览 */}
+            <div className="mb-3 grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="rounded border border-ink-200 bg-ink-50 p-2">
+                <div className="text-ink-400">平均情绪</div>
+                <div className="text-base font-semibold text-ink-800">{avgEmotion}</div>
+              </div>
+              <div className="rounded border border-green-200 bg-green-50 p-2">
+                <div className="text-ink-400">最高情绪</div>
+                <div className="text-base font-semibold text-green-700">+{maxEmotion}</div>
+              </div>
+              <div className="rounded border border-red-200 bg-red-50 p-2">
+                <div className="text-ink-400">最低情绪</div>
+                <div className="text-base font-semibold text-red-700">{minEmotion}</div>
+              </div>
+            </div>
+
+            {/* 情绪曲线 */}
+            <div className="mb-4">
+              <h4 className="mb-2 text-sm font-semibold text-ink-700">情绪起伏曲线</h4>
+              <EmotionCurve xLabels={xLabels} values={stats.emotions} intensity={stats.intensities} height={240} />
+            </div>
+
+            {/* 伏笔标注 */}
+            <div className="mb-2">
+              <div className="mb-2 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-ink-700">🔖 伏笔标注</h4>
+                {foreshadowCards.length > 0 && (
+                  <span className="text-xs text-ink-500">
+                    共 {foreshadowCards.length} 条
+                    {unresolvedCount > 0 && (
+                      <span className="ml-1 text-red-500">⚠ {unresolvedCount} 条未回收</span>
+                    )}
+                  </span>
+                )}
+              </div>
+              {foreshadowCards.length === 0 ? (
+                <p className="rounded border border-dashed border-ink-200 p-4 text-center text-xs text-ink-400">
+                  本章无伏笔标注
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {foreshadowCards.map((c) => {
+                    const resolved = c.resolved
+                    return (
+                      <li
+                        key={c.id}
+                        className={
+                          'rounded border p-2 text-xs ' +
+                          (resolved ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50')
+                        }
+                      >
+                        <div className="flex items-center gap-2">
+                          {!resolved && <span className="text-red-500">⚠️</span>}
+                          <span className="font-medium text-ink-800">{c.title}</span>
+                          <span
+                            className={
+                              'ml-auto rounded px-1.5 py-0.5 text-[10px] ' +
+                              (resolved
+                                ? 'bg-green-200 text-green-800'
+                                : 'bg-red-200 text-red-800')
+                            }
+                          >
+                            {resolved ? '已回收' : '未回收'}
+                          </span>
+                        </div>
+                        {c.content && (
+                          <p className="mt-1 line-clamp-2 text-ink-600">{c.content}</p>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {/* 卡片情绪明细 */}
+            <div>
+              <h4 className="mb-2 text-sm font-semibold text-ink-700">卡片情绪明细</h4>
+              <ul className="space-y-1">
+                {cards.map((c, i) => (
+                  <li key={c.id} className="flex items-center gap-2 rounded bg-ink-50 p-1.5 text-xs">
+                    <span className="text-ink-400">#{i + 1}</span>
+                    <span className="flex-1 truncate text-ink-700">
+                      {c.title?.trim() || '（无标题）'}
+                    </span>
+                    {c.isForeshadow && <span className="text-purple-600">🔖</span>}
+                    <span
+                      className={
+                        'rounded px-1.5 py-0.5 text-[10px] ' +
+                        ((c.emotion ?? 0) >= 0
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700')
+                      }
+                    >
+                      情绪 {c.emotion ?? 0}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+          >
+            关闭
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
