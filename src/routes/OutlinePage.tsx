@@ -409,7 +409,7 @@ function ChapterCard({
           第 {chapter.index + 1} 章
         </div>
         <div className="flex-1">
-          <div className="text-sm font-semibold">{chapter.title}</div>
+          <div className="text-sm font-semibold text-ink-800">{chapter.title}</div>
           <div className="mt-0.5 text-xs text-ink-500">{chapter.conflict}</div>
         </div>
         <button
@@ -434,7 +434,7 @@ function ChapterCard({
         </div>
       )}
       {foreshadowCount > 0 && (
-        <div className="mt-2 text-xs text-purple-400">🔖 本章含 {foreshadowCount} 条伏笔标注</div>
+        <div className="mt-2 text-xs text-accent-magenta">🔖 本章含 {foreshadowCount} 条伏笔标注</div>
       )}
     </div>
   )
@@ -569,7 +569,7 @@ function ChapterEmotionForeshadowModal({
                     <span className="flex-1 truncate text-ink-700">
                       {c.title?.trim() || '（无标题）'}
                     </span>
-                    {c.isForeshadow && <span className="text-purple-400">🔖</span>}
+                    {c.isForeshadow && <span className="text-accent-magenta">🔖</span>}
                     <span
                       className={
                         'rounded px-1.5 py-0.5 text-[10px] ' +

@@ -49,12 +49,12 @@ export function EmotionCurve({
         smooth: true,
         symbolSize: 8,
         showSymbol: true,
-        itemStyle: { color: '#3b82f6' },
-        lineStyle: { color: '#3b82f6', width: 2 },
+        itemStyle: { color: '#8FA5E8' },
+        lineStyle: { color: '#8FA5E8', width: 2 },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(59,130,246,0.35)' },
-            { offset: 1, color: 'rgba(59,130,246,0.02)' },
+            { offset: 0, color: 'rgba(143, 165, 232, 0.35)' },
+            { offset: 1, color: 'rgba(143, 165, 232, 0.02)' },
           ]),
         },
         data: values,
@@ -82,8 +82,8 @@ export function EmotionCurve({
         smooth: true,
         showSymbol: true,
         symbolSize: 6,
-        itemStyle: { color: '#f59e0b' },
-        lineStyle: { color: '#f59e0b', width: 2, type: 'dotted' },
+        itemStyle: { color: '#C48BDF' },
+        lineStyle: { color: '#C48BDF', width: 2, type: 'dotted' },
         data: idealCurve,
       })
     }
@@ -94,10 +94,10 @@ export function EmotionCurve({
         min: -5,
         max: 5,
         interval: 1,
-        splitLine: { lineStyle: { color: '#ededed' } },
-        axisLabel: { color: '#595959' },
+        splitLine: { lineStyle: { color: 'rgba(140, 148, 200, 0.15)' } },
+        axisLabel: { color: '#AAB2DA' },
         name: '情绪值',
-        nameTextStyle: { color: '#8c8c8c', fontSize: 11 },
+        nameTextStyle: { color: '#8C94C8', fontSize: 11 },
       },
     ]
     if (hasConflict) {
@@ -107,21 +107,32 @@ export function EmotionCurve({
         max: 5,
         interval: 1,
         splitLine: { show: false },
-        axisLabel: { color: '#ef4444' },
+        axisLabel: { color: '#E8A0A0' },
         name: '冲突强度',
-        nameTextStyle: { color: '#ef4444', fontSize: 11 },
+        nameTextStyle: { color: '#E8A0A0', fontSize: 11 },
       })
     }
 
     inst.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(22, 22, 52, 0.95)',
+        borderColor: 'rgba(143, 165, 232, 0.4)',
+        textStyle: { color: '#F0F2FC' },
+      },
       grid: { left: 45, right: hasConflict ? 50 : 20, top: 30, bottom: 40 },
-      legend: { top: 0, right: 0, icon: 'line', textStyle: { fontSize: 11 } },
+      legend: {
+        top: 0,
+        right: 0,
+        icon: 'line',
+        textStyle: { fontSize: 11, color: '#AAB2DA' },
+      },
       xAxis: {
         type: 'category',
         data: xLabels,
-        axisLabel: { hideOverlap: true, color: '#595959', fontSize: 11 },
+        axisLabel: { hideOverlap: true, color: '#AAB2DA', fontSize: 11 },
         axisTick: { show: false },
+        axisLine: { lineStyle: { color: 'rgba(140, 148, 200, 0.2)' } },
       },
       yAxis: yAxes,
       series,

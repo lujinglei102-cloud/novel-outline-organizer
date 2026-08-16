@@ -268,11 +268,11 @@ function NarrativeLineView({
                   className={
                     'flex items-start gap-3 rounded border p-3 transition cursor-grab active:cursor-grabbing ' +
                     (isDragging
-                      ? 'border-blue-500 bg-cyan-900/30 opacity-50 '
-                      : isOver
+                      ? 'border-accent-periwinkle bg-accent-periwinkle/15 opacity-50 '
+                        : isOver
                       ? 'border-green-500 bg-green-900/30 '
                       : isHi
-                      ? 'border-blue-400 bg-cyan-900/30'
+                      ? 'border-accent-periwinkle bg-accent-periwinkle/15'
                       : 'border-ink-300 cyber-surface hover:bg-ink-200/50')
                   }
                 >
@@ -289,7 +289,7 @@ function NarrativeLineView({
                       'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
                       (tp.severity === 'high'
                         ? 'border-red-500 bg-red-900/30 text-red-400'
-                        : 'border-orange-400 bg-orange-50 text-orange-700')
+                        : 'border-semantic-warning/60 bg-semantic-warning/15 text-semantic-warning')
                     }
                   >
                     {tp.severity === 'high' ? '🔴' : '🟠'} [{tp.type === 'stage_transition' ? '阶段跳跃' : tp.type === 'emotion_shift' ? '情绪翻转' : '转折缺失'}] {tp.hint}
@@ -421,8 +421,8 @@ function CharactersView({
                         }}
                         className={
                           selCharId === c.id
-                            ? 'text-cyan-300 hover:text-blue-100'
-                            : 'text-cyan-300 hover:underline neon-text-cyan'
+                            ? 'text-accent-periwinkle hover:text-ink-800'
+                            : 'text-accent-periwinkle hover:underline neon-text-cyan'
                         }
                       >
                         编辑
@@ -450,7 +450,7 @@ function CharactersView({
                     <div
                       className={
                         'mt-1 text-xs ' +
-                        (selCharId === c.id ? 'text-amber-300 neon-text-gold' : 'text-amber-600')
+                        (selCharId === c.id ? 'text-semantic-warning' : 'text-ink-500')
                       }
                     >
                       ⚠ {c.conflictTag}
@@ -545,7 +545,7 @@ function ForeshadowView({
       {/* 手动标记的伏笔 */}
       {manualForeshadowCards.length > 0 && (
         <div className="mb-4">
-          <h3 className="mb-2 text-sm font-semibold font-cute text-purple-400 neon-text">🔖 手动标记的伏笔</h3>
+          <h3 className="mb-2 text-sm font-semibold font-cute text-accent-magenta neon-text">🔖 手动标记的伏笔</h3>
           <ul className="space-y-2">
             {manualForeshadowCards.map((c) => {
               const resolved = c.foreshadowResolved
@@ -683,7 +683,7 @@ function EmotionView({
         <p className="text-xs text-ink-500">
           已标注 {sortedCards.filter((c) => typeof c.emotion === 'number').length} /{' '}
           {sortedCards.length}
-          {autoTagged && <span className="ml-2 text-cyan-400">· 当前为自动补标结果</span>}
+          {autoTagged && <span className="ml-2 text-accent-periwinkle">· 当前为自动补标结果</span>}
         </p>
         <div className="flex items-center gap-2">
           <span className="group relative inline-flex">
@@ -706,7 +706,7 @@ function EmotionView({
                 }
               }}
               disabled={loading}
-              className="rounded border-cyan-500/60 bg-cyan-900/30 px-3 py-1 text-xs text-cyan-300 hover:bg-cyan-800/40 disabled:opacity-50"
+              className="rounded border-accent-periwinkle/60 bg-accent-periwinkle/15 px-3 py-1 text-xs text-accent-periwinkle hover:bg-accent-periwinkle/25 disabled:opacity-50"
             >
               ↩ 恢复手动标注
             </button>
@@ -776,7 +776,7 @@ function EmotionView({
                     setEVal(c.emotion ?? 0)
                     setIVal(c.intensity ?? 1)
                   }}
-                  className="ml-auto text-xs text-cyan-400 hover:underline"
+                  className="ml-auto text-xs text-accent-periwinkle hover:underline"
                 >
                   改
                 </button>

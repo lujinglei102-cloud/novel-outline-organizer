@@ -45,7 +45,7 @@ export function StructureNodesEditor({
               className={
                 'group flex items-center gap-1 rounded border px-3 py-1.5 text-sm ' +
                 (active
-                  ? 'border-ink-900 bg-ink-900 text-white'
+                  ? 'border-accent-periwinkle bg-accent-periwinkle/20 text-ink-800'
                   : 'border-ink-300 cyber-surface hover:border-ink-400 cursor-pointer')
               }
             >
@@ -81,7 +81,7 @@ export function StructureNodesEditor({
                 <span
                   className={
                     'ml-1 rounded px-1 text-xs ' +
-                    (active ? 'bg-white/20' : 'bg-ink-100/50 text-ink-500')
+                    (active ? 'bg-accent-periwinkle/30 text-ink-700' : 'bg-ink-100/50 text-ink-500')
                   }
                 >
                   {b.count ?? 0}张
@@ -96,7 +96,7 @@ export function StructureNodesEditor({
                 }}
                 className={
                   'ml-1 hidden text-xs opacity-60 group-hover:inline ' +
-                  (active ? 'text-white/80' : '')
+                  (active ? 'text-ink-700' : '')
                 }
               >
                 ✎
@@ -114,7 +114,7 @@ export function StructureNodesEditor({
                   }}
                   className={
                     'ml-1 hidden text-xs opacity-60 group-hover:inline ' +
-                    (active ? 'text-white/80' : 'text-red-500')
+                    (active ? 'text-ink-700' : 'text-red-500')
                   }
                 >
                   ×
