@@ -36,6 +36,7 @@ export function SortPage() {
     toggleForeshadowCard,
     runEmotionRetag,
     refreshEmotionSeries,
+    restoreManualEmotion,
     saveTagToCard,
     emotionSeries,
     loadPersisted,
@@ -156,6 +157,7 @@ export function SortPage() {
           sortedCards={sortedCards}
           emotionSeries={emotionSeries}
           onRetag={runEmotionRetag}
+          onRestore={restoreManualEmotion}
           onSaveTag={saveTagToCard}
           highlightCardId={highlightCardId}
           onHighlight={setHighlightCardId}
@@ -653,6 +655,7 @@ function EmotionView({
   sortedCards,
   emotionSeries,
   onRetag,
+  onRestore,
   onSaveTag,
   highlightCardId,
   onHighlight,
@@ -660,6 +663,7 @@ function EmotionView({
   sortedCards: { id: string; content: string; emotion?: number; intensity?: number }[]
   emotionSeries: { x: number; y: number; cardId: string }[]
   onRetag: () => Promise<void>
+  onRestore: () => Promise<void>
   onSaveTag: (cardId: string, emotion: number, intensity: number) => Promise<void>
   highlightCardId: string | null
   onHighlight: (id: string | null) => void
@@ -668,6 +672,7 @@ function EmotionView({
   const [eVal, setEVal] = useState(0)
   const [iVal, setIVal] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [autoTagged, setAutoTagged] = useState(false) // 是否当前处于自动补标状态
 
   const values = emotionSeries.map((p) => p.y)
   const xLabels = emotionSeries.map((p) => `#${p.x + 1}`)
@@ -678,22 +683,51 @@ function EmotionView({
         <p className="text-xs text-ink-500">
           已标注 {sortedCards.filter((c) => typeof c.emotion === 'number').length} /{' '}
           {sortedCards.length}
-          <span className="ml-2 text-ink-400">· 手动设置的值不会被覆盖</span>
+          {autoTagged && <span className="ml-2 text-blue-500">· 当前为自动补标结果</span>}
         </p>
-        <button
-          onClick={async () => {
-            setLoading(true)
-            try {
-              await onRetag()
-            } finally {
-              setLoading(false)
-            }
-          }}
-          disabled={loading}
-          className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
-        >
-          ↻ 自动补标（仅未手动标注的卡片）
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="group relative inline-flex">
+            <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-ink-300 text-[10px] text-ink-500">
+              ?
+            </span>
+            <span className="pointer-events-none absolute right-0 top-6 z-10 hidden whitespace-nowrap rounded bg-ink-800 px-2 py-1 text-[11px] text-white group-hover:block">
+              由ai自动感知卡片中情绪起伏并标注
+            </span>
+          </span>
+          {autoTagged ? (
+            <button
+              onClick={async () => {
+                setLoading(true)
+                try {
+                  await onRestore()
+                } finally {
+                  setLoading(false)
+                  setAutoTagged(false)
+                }
+              }}
+              disabled={loading}
+              className="rounded border border-blue-300 bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+            >
+              ↩ 恢复手动标注
+            </button>
+          ) : (
+            <button
+              onClick={async () => {
+                setLoading(true)
+                try {
+                  await onRetag()
+                } finally {
+                  setLoading(false)
+                  setAutoTagged(true)
+                }
+              }}
+              disabled={loading}
+              className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+            >
+              ↻ 自动补标
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mb-4 rounded border border-ink-200 p-2">

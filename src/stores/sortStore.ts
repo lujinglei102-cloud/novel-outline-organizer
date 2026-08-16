@@ -50,6 +50,7 @@ interface SortState {
   toggleForeshadowCard: (cardId: string) => Promise<void>
   runEmotionRetag: () => Promise<void>
   refreshEmotionSeries: () => void
+  restoreManualEmotion: () => Promise<void>
   saveTagToCard: (cardId: string, emotion: number, intensity: number) => Promise<void>
   runSkeletonDirections: (
     preferredTemplateIds?: string[],
@@ -161,6 +162,16 @@ export const useSortStore = create<SortState>((set, get) => ({
   refreshEmotionSeries: () => {
     // 只用当前 sortedCards 的情绪值刷新曲线，不重新标注（保留用户手动值）
     set({ emotionSeries: computeEmotionSeries(get().sortedCards) })
+  },
+
+  restoreManualEmotion: async () => {
+    // 从 DB 重新加载卡片，保持当前排序顺序，恢复 DB 中的情绪值
+    const dbCards = await getAllCards()
+    const currentOrder = get().sortedCards.map((c) => c.id)
+    const restored = currentOrder
+      .map((id) => dbCards.find((c) => c.id === id))
+      .filter(Boolean) as Card[]
+    set({ sortedCards: restored, emotionSeries: computeEmotionSeries(restored) })
   },
 
   saveTagToCard: async (cardId, emotion, intensity) => {
