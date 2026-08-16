@@ -2,25 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========== 深色模式（默认·赛博朋克） ========== */
 :root {
-  font-family: '宋体', 'SimSun', sans-serif;
+  /* VT323 用于英文/数字（像素风），宋体用于中文 */
+  font-family: 'VT323', '宋体', 'SimSun', sans-serif;
   color-scheme: dark;
+
+  /* 深色模式：背景深紫，文字亮色（提亮 400+ 保证对比度 ≥ 4.5:1） */
+  --ink-50: 10 11 46;       /* #0A0B2E 最深背景 */
+  --ink-100: 15 16 53;      /* #0F1035 */
+  --ink-200: 30 27 75;      /* #1E1B4B 边框 */
+  --ink-300: 49 46 129;     /* #312E81 */
+  --ink-400: 124 138 245;   /* #7C8AF5 提亮：原#6366F1 → 保证文字可读 */
+  --ink-500: 165 180 252;   /* #A5B4FC 提亮：原#818CF8 */
+  --ink-600: 199 210 254;   /* #C7D2FE 提亮：原#A5B4FC */
+  --ink-700: 224 231 255;   /* #E0E7FF 提亮：原#C7D2FE */
+  --ink-800: 240 249 255;   /* #F0F9FF 提亮：原#E0E7FF */
+  --ink-900: 255 255 255;   /* #FFFFFF 提亮：原#F0F9FF */
+
+  --bg-gradient: linear-gradient(180deg, #0A0B2E 0%, #1E1B4B 40%, #3B2C7A 75%, #6366F1 100%);
+  --bg-color: #0A0B2E;
+  --text-color: #E0E7FF;
+  --surface-bg: rgba(30, 27, 75, 0.85);
+  --surface-border: #312E81;
+  --modal-bg: rgba(15, 16, 53, 0.95);
+  --modal-border: #6366F1;
+  --btn-gradient: linear-gradient(180deg, #6366F1, #4338CA);
+  --btn-border: #0A0B2E;
+  --btn-text: #F0F9FF;
+  --btn-glow: rgba(99, 102, 241, 0.5);
+  --input-bg: rgba(10, 11, 46, 0.6);
+  --input-border: #4338CA;
+  --input-focus: #A855F7;
+  --scanline-opacity: 0.5;
+  --star-opacity: 1;
+}
+
+/* ========== 浅色模式（原版白底） ========== */
+.light-mode {
+  color-scheme: light;
+
+  --ink-50: 247 247 247;    /* #f7f7f7 */
+  --ink-100: 237 237 237;   /* #ededed */
+  --ink-200: 217 217 217;   /* #d9d9d9 */
+  --ink-300: 191 191 191;   /* #bfbfbf */
+  --ink-400: 140 140 140;   /* #8c8c8c */
+  --ink-500: 89 89 89;      /* #595959 */
+  --ink-600: 67 67 67;      /* #434343 */
+  --ink-700: 38 38 38;      /* #262626 */
+  --ink-800: 31 31 31;      /* #1f1f1f */
+  --ink-900: 13 13 13;      /* #0d0d0d */
+
+  --bg-gradient: none;
+  --bg-color: #ffffff;
+  --text-color: #0d0d0d;
+  --surface-bg: #ffffff;
+  --surface-border: #d9d9d9;
+  --modal-bg: #ffffff;
+  --modal-border: #d9d9d9;
+  --btn-gradient: linear-gradient(180deg, #1f1f1f, #0d0d0d);
+  --btn-border: #0d0d0d;
+  --btn-text: #ffffff;
+  --btn-glow: rgba(0, 0, 0, 0.15);
+  --input-bg: #ffffff;
+  --input-border: #d9d9d9;
+  --input-focus: #6366F1;
+  --scanline-opacity: 0;
+  --star-opacity: 0;
 }
 
 body {
   margin: 0;
-  /* 赛博朋克渐变背景 */
-  background: linear-gradient(180deg, #0A0B2E 0%, #1E1B4B 40%, #3B2C7A 75%, #6366F1 100%);
+  background: var(--bg-gradient, var(--bg-color));
   background-attachment: fixed;
-  color: #E0E7FF;
+  color: var(--text-color);
   min-height: 100vh;
+  /* VT323 像素字体偏大，微缩字号保持布局 */
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* CRT 扫描线效果 */
+/* CRT 扫描线（仅深色模式） */
 body::before {
   content: '';
   position: fixed;
@@ -34,16 +100,17 @@ body::before {
     transparent 1px,
     transparent 3px
   );
-  opacity: 0.5;
+  opacity: var(--scanline-opacity);
 }
 
-/* 星空漂移氛围 */
+/* 星空漂移（仅深色模式） */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  opacity: var(--star-opacity);
   background-image:
     radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.4), transparent),
     radial-gradient(1px 1px at 60% 70%, rgba(168,85,247,0.3), transparent),
@@ -59,31 +126,43 @@ body::after {
   100% { background-position: 100% 100%; }
 }
 
-/* 霓虹文字光晕 */
+/* 霓虹文字光晕（深色模式生效，浅色模式无效果） */
 .neon-text {
   text-shadow: 0 0 8px rgba(168, 85, 247, 0.8), 0 0 16px rgba(168, 85, 247, 0.4);
+}
+.light-mode .neon-text {
+  text-shadow: none;
 }
 
 .neon-text-cyan {
   text-shadow: 0 0 8px rgba(34, 211, 238, 0.8), 0 0 16px rgba(34, 211, 238, 0.4);
 }
+.light-mode .neon-text-cyan {
+  text-shadow: none;
+}
 
 .neon-text-gold {
   text-shadow: 0 0 8px rgba(251, 191, 36, 0.8), 0 0 16px rgba(251, 191, 36, 0.4);
 }
+.light-mode .neon-text-gold {
+  text-shadow: none;
+}
 
-/* 赛博朋克按钮（替代 bg-ink-800 text-white） */
+/* 赛博朋克按钮 */
 .cyber-btn {
-  background: linear-gradient(180deg, #6366F1, #4338CA);
-  border: 2px solid #0A0B2E;
-  color: #F0F9FF;
+  background: var(--btn-gradient);
+  border: 2px solid var(--btn-border);
+  color: var(--btn-text);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 6px rgba(99, 102, 241, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 6px var(--btn-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 150ms ease;
 }
 .cyber-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.8), 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px var(--btn-glow), 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.light-mode .cyber-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 .cyber-btn:active:not(:disabled) {
   transform: translateY(1px);
@@ -94,20 +173,29 @@ body::after {
   filter: grayscale(0.5);
 }
 
-/* 赛博朋克卡片表面（替代 bg-white） */
+/* 卡片表面 */
 .cyber-surface {
-  background: rgba(30, 27, 75, 0.85);
+  background: var(--surface-bg);
   backdrop-filter: blur(8px);
-  border: 1px solid #312E81;
+  border: 1px solid var(--surface-border);
   box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+.light-mode .cyber-surface {
+  backdrop-filter: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
 
-/* 赛博朋克弹窗（替代 bg-white shadow-lg） */
+/* 弹窗 */
 .cyber-modal {
-  background: rgba(15, 16, 53, 0.95);
+  background: var(--modal-bg);
   backdrop-filter: blur(12px);
-  border: 2px solid #6366F1;
+  border: 2px solid var(--modal-border);
   box-shadow: 0 0 16px rgba(99, 102, 241, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.light-mode .cyber-modal {
+  backdrop-filter: none;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 /* 霓虹边框 */
@@ -115,46 +203,65 @@ body::after {
   border: 1px solid #6366F1;
   box-shadow: 0 0 6px rgba(99, 102, 241, 0.4);
 }
+.light-mode .neon-border {
+  box-shadow: none;
+}
 
-/* 像素风输入框 */
+/* 输入框 */
 .cyber-input {
-  background: rgba(10, 11, 46, 0.6);
-  border: 1px solid #4338CA;
-  color: #E0E7FF;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
   transition: border-color 150ms, box-shadow 150ms;
 }
 .cyber-input:focus {
-  border-color: #A855F7;
+  border-color: var(--input-focus);
   box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
   outline: none;
 }
+.light-mode .cyber-input:focus {
+  box-shadow: 0 0 4px rgba(99, 102, 241, 0.3);
+}
 .cyber-input::placeholder {
-  color: #6366F1;
+  color: rgb(var(--ink-400));
   opacity: 0.6;
 }
 
-/* 赛博朋克标签 */
+/* Tab 激活态 */
 .cyber-tab-active {
-  background: linear-gradient(180deg, #6366F1, #4338CA);
-  color: #F0F9FF;
+  background: var(--btn-gradient);
+  color: var(--btn-text);
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 8px var(--btn-glow);
+}
+.light-mode .cyber-tab-active {
+  text-shadow: none;
+  box-shadow: none;
 }
 
-/* 滚动条样式 */
+/* 滚动条 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0B2E;
+  background: rgb(var(--ink-50));
 }
 ::-webkit-scrollbar-thumb {
-  background: #4338CA;
-  border-radius: 0;
+  background: rgb(var(--ink-300));
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366F1;
+  background: rgb(var(--ink-400));
+}
+
+/* 像素字体类：用于标题和数字 */
+.font-pixel {
+  font-family: '"Press Start 2P"', '宋体', monospace;
+  letter-spacing: 0.5px;
+}
+.font-retro {
+  font-family: '"VT323"', '宋体', monospace;
+  letter-spacing: 0.3px;
 }
 
 /* 减少动画偏好 */

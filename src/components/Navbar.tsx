@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useCardStore } from '@/stores/cardStore'
 
@@ -11,6 +12,25 @@ const stages = [
 export function Navbar() {
   const navigate = useNavigate()
   const cardsCount = useCardStore((s) => s.cards.length)
+  const [isLight, setIsLight] = useState(false)
+
+  useEffect(() => {
+    setIsLight(document.documentElement.classList.contains('light-mode'))
+  }, [])
+
+  const toggleTheme = () => {
+    const root = document.documentElement
+    const next = !root.classList.contains('light-mode')
+    if (next) {
+      root.classList.add('light-mode')
+      localStorage.setItem('theme-mode', 'light')
+    } else {
+      root.classList.remove('light-mode')
+      localStorage.setItem('theme-mode', 'dark')
+    }
+    setIsLight(next)
+  }
+
   return (
     <header className="border-b border-ink-300 cyber-surface">
       <div className="mx-auto flex h-14 max-w-6xl flex-wrap items-center justify-between gap-2 px-4">
@@ -35,8 +55,18 @@ export function Navbar() {
             ))}
           </nav>
         </div>
-        <div className="text-xs text-ink-400">
-          {cardsCount > 0 ? `卡片数：${cardsCount}` : '欢迎创作 · 记录第一个灵感'}
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-ink-400">
+            {cardsCount > 0 ? `卡片数：${cardsCount}` : '欢迎创作 · 记录第一个灵感'}
+          </span>
+          {/* 主题切换按钮 */}
+          <button
+            onClick={toggleTheme}
+            className="rounded border border-ink-300 px-2 py-1 text-sm hover:bg-ink-200/50"
+            title={isLight ? '切换到深色模式' : '切换到浅色模式'}
+          >
+            {isLight ? '🌙' : '☀️'}
+          </button>
         </div>
       </div>
       {/* 移动端底部 tabbar（隐藏在桌面端） */}

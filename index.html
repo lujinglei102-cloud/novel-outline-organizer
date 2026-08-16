@@ -4,6 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>小说大纲梳理器</title>
+    <!-- 像素字体：Press Start 2P（标题）+ VT323（正文/数字） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <!-- 主题初始化：在渲染前应用，防止闪烁 -->
+    <script>
+      ;(function () {
+        var saved = localStorage.getItem('theme-mode')
+        if (saved === 'light') {
+          document.documentElement.classList.add('light-mode')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

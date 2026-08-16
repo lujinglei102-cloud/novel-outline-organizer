@@ -4,23 +4,24 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"宋体"', '"SimSun"', 'sans-serif'],
+        sans: ['"VT323"', '"宋体"', '"SimSun"', 'sans-serif'],
+        pixel: ['"Press Start 2P"', '"宋体"', 'monospace'],
+        retro: ['"VT323"', '"宋体"', 'monospace'],
       },
       colors: {
-        // 赛博朋克配色：反转 ink 色阶（50=最深，900=最亮）
+        // 使用 CSS 变量，支持深色/浅色双主题切换
         ink: {
-          50: '#0A0B2E', // 深紫黑（主背景）
-          100: '#0F1035', // 深紫
-          200: '#1E1B4B', // 中深紫（边框/分区）
-          300: '#312E81', // 中紫
-          400: '#6366F1', // 蓝紫（强调色）
-          500: '#818CF8', // 中亮紫
-          600: '#A5B4FC', // 亮紫
-          700: '#C7D2FE', // 淡亮（次要文字）
-          800: '#E0E7FF', // 近白（主文字）
-          900: '#F0F9FF', // 最亮
+          50: 'rgb(var(--ink-50) / <alpha-value>)',
+          100: 'rgb(var(--ink-100) / <alpha-value>)',
+          200: 'rgb(var(--ink-200) / <alpha-value>)',
+          300: 'rgb(var(--ink-300) / <alpha-value>)',
+          400: 'rgb(var(--ink-400) / <alpha-value>)',
+          500: 'rgb(var(--ink-500) / <alpha-value>)',
+          600: 'rgb(var(--ink-600) / <alpha-value>)',
+          700: 'rgb(var(--ink-700) / <alpha-value>)',
+          800: 'rgb(var(--ink-800) / <alpha-value>)',
+          900: 'rgb(var(--ink-900) / <alpha-value>)',
         },
-        // 霓虹色
         neon: {
           purple: '#A855F7',
           cyan: '#22D3EE',
