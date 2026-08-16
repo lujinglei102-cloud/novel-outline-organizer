@@ -111,7 +111,7 @@ export function SortPage() {
             className={
               '-mb-px border-b-2 px-4 py-2 text-sm transition ' +
               (tab === t.id
-                ? 'border-ink-900 font-semibold text-ink-900'
+                ? 'cyber-tab-active'
                 : 'border-transparent text-ink-500 hover:text-ink-800')
             }
           >
@@ -300,8 +300,8 @@ function NarrativeLineView({
                     className={
                       'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
                       (gapHere.density === 'dense'
-                        ? 'border-amber-400 bg-amber-50 text-amber-700'
-                        : 'border-red-400 bg-red-900/30 text-red-400')
+                        ? 'pixel-badge pixel-badge-amber'
+                        : 'pixel-badge pixel-badge-red')
                     }
                   >
                     💡 {gapHere.hint}
@@ -394,7 +394,7 @@ function CharactersView({
                           }
                           if (e.key === 'Escape') setEditingId(null)
                         }}
-                        className="w-full rounded border border-ink-300 px-1.5 py-0.5 text-sm text-ink-800"
+                        className="w-full px-1.5 py-0.5 text-sm cyber-input"
                         autoFocus
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -422,7 +422,7 @@ function CharactersView({
                         className={
                           selCharId === c.id
                             ? 'text-cyan-300 hover:text-blue-100'
-                            : 'text-cyan-400 hover:underline'
+                            : 'text-cyan-300 hover:underline neon-text-cyan'
                         }
                       >
                         编辑
@@ -439,7 +439,7 @@ function CharactersView({
                         className={
                           selCharId === c.id
                             ? 'text-red-200 hover:text-red-100'
-                            : 'text-red-600 hover:underline'
+                            : 'text-red-400 hover:underline'
                         }
                       >
                         删除
@@ -450,7 +450,7 @@ function CharactersView({
                     <div
                       className={
                         'mt-1 text-xs ' +
-                        (selCharId === c.id ? 'text-amber-200' : 'text-amber-700')
+                        (selCharId === c.id ? 'text-amber-300 neon-text-gold' : 'text-amber-600')
                       }
                     >
                       ⚠ {c.conflictTag}
@@ -604,11 +604,11 @@ function ForeshadowView({
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {!resolved && <span className="text-red-500 text-base">⚠️</span>}
-                  <span className="rounded bg-ink-100/50 px-2 py-0.5 text-xs text-ink-500">
+                  <span className="pixel-badge pixel-badge-gray">
                     #{l.cardAId.slice(0, 8)}
                   </span>
                   <span className="text-ink-400">⇌</span>
-                  <span className="rounded bg-ink-100/50 px-2 py-0.5 text-xs text-ink-500">
+                  <span className="pixel-badge pixel-badge-gray">
                     #{l.cardBId.slice(0, 8)}
                   </span>
                   <span className="ml-2 text-ink-800">共现词：{l.reason}</span>
@@ -639,14 +639,14 @@ function ForeshadowView({
 function Badge({ color, label }: { color: 'green' | 'gray' | 'amber' | 'red' | 'purple'; label: string }) {
   const cls =
     color === 'green'
-      ? 'border-green-500/60 text-green-400 bg-green-900/30'
+      ? 'pixel-badge pixel-badge-green'
       : color === 'amber'
-      ? 'border-amber-300 text-amber-700 bg-amber-50'
+      ? 'pixel-badge pixel-badge-amber'
       : color === 'red'
-      ? 'border-red-500/60 text-red-400 bg-red-900/30'
+      ? 'pixel-badge pixel-badge-red'
       : color === 'purple'
-      ? 'border-purple-500/60 bg-purple-900/30 text-purple-400'
-      : 'border-ink-300 text-ink-600 bg-ink-100/50'
+      ? 'pixel-badge pixel-badge-purple'
+      : 'pixel-badge pixel-badge-gray'
   return <span className={`rounded border px-2 py-0.5 text-xs ${cls}`}>{label}</span>
 }
 
@@ -690,7 +690,7 @@ function EmotionView({
             <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-ink-300 text-[10px] text-ink-500">
               ?
             </span>
-            <span className="pointer-events-none absolute right-0 top-6 z-10 hidden whitespace-nowrap rounded bg-ink-800 px-2 py-1 text-[11px] text-white group-hover:block">
+            <span className="pointer-events-none absolute right-0 top-6 z-10 hidden whitespace-nowrap rounded pixel-tooltip group-hover:block">
               由ai自动感知卡片中情绪起伏并标注
             </span>
           </span>

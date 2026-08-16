@@ -285,7 +285,7 @@ export function OutlinePage() {
                   return (
                     <div key={nodeName}>
                       <div className="mb-2 flex items-center gap-2 border-b border-ink-100 pb-1">
-                        <span className="rounded bg-ink-800 px-2 py-0.5 text-xs text-white">
+                        <span className="pixel-node-badge">
                           {nodeName}
                         </span>
                         <span className="text-xs text-ink-400">{list.length} 章</span>
@@ -574,8 +574,8 @@ function ChapterEmotionForeshadowModal({
                       className={
                         'rounded px-1.5 py-0.5 text-[10px] ' +
                         ((c.emotion ?? 0) >= 0
-                          ? 'bg-green-900/40 text-green-400'
-                          : 'bg-red-900/40 text-red-400')
+                          ? 'bg-green-900/40 text-green-300'
+                          : 'bg-red-900/40 text-red-300')
                       }
                     >
                       情绪 {c.emotion ?? 0}

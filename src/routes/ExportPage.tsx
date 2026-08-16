@@ -32,7 +32,7 @@ export function ExportPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-lg font-semibold">导出大纲</h1>
-          <p className="text-xs text-ink-400">一键导出为 Markdown 或纯文本，可直接复制到写作软件</p>
+          <p className="text-xs text-ink-500">一键导出为 Markdown 或纯文本，可直接复制到写作软件</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -45,11 +45,11 @@ export function ExportPage() {
       </div>
 
       {loading ? (
-        <div className="animate-pulse rounded border border-ink-100 p-8 text-center text-sm text-ink-400">
+        <div className="animate-pulse rounded border border-ink-300 p-8 text-center text-sm text-ink-600">
           正在组装大纲…
         </div>
       ) : chapters.length === 0 ? (
-        <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-500">
+        <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-600">
           还没有章节内容，请先回到阶段三构建骨架并生成章节。
           <div className="mt-3">
             <button
@@ -72,13 +72,13 @@ export function ExportPage() {
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <article className="rounded border border-ink-300 cyber-surface p-5">
               <h3 className="mb-2 text-sm font-semibold text-ink-700 neon-text">Markdown 预览</h3>
-              <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-800 max-h-[70vh] overflow-auto">
+              <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-900 font-retro max-h-[70vh] overflow-auto">
                 {md}
               </pre>
             </article>
             <article className="rounded border border-ink-300 cyber-surface p-5">
               <h3 className="mb-2 text-sm font-semibold text-ink-700 neon-text">纯文本预览</h3>
-              <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-800 max-h-[70vh] overflow-auto">
+              <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-900 font-retro max-h-[70vh] overflow-auto">
                 {txt}
               </pre>
             </article>

@@ -112,8 +112,8 @@ export function CardsPage() {
 
       {/* 当前书籍提示 */}
       {currentBook && (
-        <div className="mb-3 text-xs text-ink-500">
-          当前书籍：<span className="font-medium text-ink-700">{currentBook.title}</span>
+        <div className="mb-3 text-xs text-ink-600">
+          当前书籍：<span className="font-semibold text-ink-800 neon-text">{currentBook.title}</span>
         </div>
       )}
 
@@ -144,7 +144,7 @@ export function CardsPage() {
       )}
 
       {/* 底部状态栏 */}
-      <div className="mt-4 border-t border-ink-100 pt-2 text-xs text-ink-400">
+      <div className="mt-4 border-t border-ink-200 pt-2 text-xs text-ink-500">
         共 {visible.length} 张卡片{currentBook ? `（${currentBook.title}）` : '（全部书籍）'}
       </div>
 

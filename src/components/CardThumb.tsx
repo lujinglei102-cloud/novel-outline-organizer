@@ -39,14 +39,14 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       className="cursor-pointer rounded border border-ink-300 cyber-surface p-3 transition hover:-translate-y-0.5 hover:shadow-md"
     >
       {/* 标题 */}
-      <p className="mb-1 text-sm font-semibold text-ink-800 neon-text line-clamp-1">
+      <p className="mb-1 text-xs font-semibold text-ink-900 neon-text line-clamp-1 font-pixel">
         {displayTitle}
       </p>
 
       {/* 正文（截断显示） */}
       {hasBody && (
         <p
-          className="text-xs text-ink-500"
+          className="text-sm text-ink-600"
           style={{
             display: '-webkit-box',
             WebkitLineClamp: bodyLines,
@@ -61,26 +61,26 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       {/* 标签栏 */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {characterName && (
-          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="pixel-badge pixel-badge-gray">
             #{characterName}
           </span>
         )}
         {card.stage && card.stage !== 'none' && (
-          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="pixel-badge pixel-badge-gray">
             [{stageLabel[card.stage]}]
           </span>
         )}
         {card.isForeshadow && (
-          <span className="rounded border border-purple-500 bg-purple-900/40 px-1.5 py-0.5 text-xs text-purple-300">
+          <span className="pixel-badge pixel-badge-purple">
             🔖伏笔
           </span>
         )}
         {typeof card.emotion === 'number' && card.emotion !== 0 && (
-          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="pixel-badge pixel-badge-gray">
             情绪{card.emotion > 0 ? '+' : ''}{card.emotion}
           </span>
         )}
-        <span className="ml-auto text-xs text-ink-400">{timeAgo(card.createdAt)}</span>
+        <span className="ml-auto text-xs text-ink-500">{timeAgo(card.createdAt)}</span>
       </div>
     </div>
   )
