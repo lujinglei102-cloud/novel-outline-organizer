@@ -391,3 +391,106 @@ body::before {
     transform: none;
   }
 }
+
+/* =====================================================
+   颜色类覆盖：使用 CSS 变量替代 Tailwind 硬编码值
+   Tailwind v3 JIT 在 ESM 配置下无法正确解析 var()，
+   生成硬编码灰色 rgb(31 31 31) 等。
+   此处手动覆盖所有颜色类，确保使用 CSS 变量，
+   实现深色/浅色模式动态切换。
+   ===================================================== */
+@layer utilities {
+  /* text-ink-* */
+  .text-ink-50 { color: rgb(var(--ink-50) / var(--tw-text-opacity, 1)); }
+  .text-ink-100 { color: rgb(var(--ink-100) / var(--tw-text-opacity, 1)); }
+  .text-ink-200 { color: rgb(var(--ink-200) / var(--tw-text-opacity, 1)); }
+  .text-ink-300 { color: rgb(var(--ink-300) / var(--tw-text-opacity, 1)); }
+  .text-ink-400 { color: rgb(var(--ink-400) / var(--tw-text-opacity, 1)); }
+  .text-ink-500 { color: rgb(var(--ink-500) / var(--tw-text-opacity, 1)); }
+  .text-ink-600 { color: rgb(var(--ink-600) / var(--tw-text-opacity, 1)); }
+  .text-ink-700 { color: rgb(var(--ink-700) / var(--tw-text-opacity, 1)); }
+  .text-ink-800 { color: rgb(var(--ink-800) / var(--tw-text-opacity, 1)); }
+  .text-ink-900 { color: rgb(var(--ink-900) / var(--tw-text-opacity, 1)); }
+
+  /* bg-ink-* */
+  .bg-ink-50 { background-color: rgb(var(--ink-50) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-100 { background-color: rgb(var(--ink-100) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-200 { background-color: rgb(var(--ink-200) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-300 { background-color: rgb(var(--ink-300) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-400 { background-color: rgb(var(--ink-400) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-500 { background-color: rgb(var(--ink-500) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-600 { background-color: rgb(var(--ink-600) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-700 { background-color: rgb(var(--ink-700) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-800 { background-color: rgb(var(--ink-800) / var(--tw-bg-opacity, 1)); }
+  .bg-ink-900 { background-color: rgb(var(--ink-900) / var(--tw-bg-opacity, 1)); }
+
+  /* border-ink-* */
+  .border-ink-50 { border-color: rgb(var(--ink-50) / var(--tw-border-opacity, 1)); }
+  .border-ink-100 { border-color: rgb(var(--ink-100) / var(--tw-border-opacity, 1)); }
+  .border-ink-200 { border-color: rgb(var(--ink-200) / var(--tw-border-opacity, 1)); }
+  .border-ink-300 { border-color: rgb(var(--ink-300) / var(--tw-border-opacity, 1)); }
+  .border-ink-400 { border-color: rgb(var(--ink-400) / var(--tw-border-opacity, 1)); }
+  .border-ink-500 { border-color: rgb(var(--ink-500) / var(--tw-border-opacity, 1)); }
+  .border-ink-600 { border-color: rgb(var(--ink-600) / var(--tw-border-opacity, 1)); }
+  .border-ink-700 { border-color: rgb(var(--ink-700) / var(--tw-border-opacity, 1)); }
+  .border-ink-800 { border-color: rgb(var(--ink-800) / var(--tw-border-opacity, 1)); }
+  .border-ink-900 { border-color: rgb(var(--ink-900) / var(--tw-border-opacity, 1)); }
+
+  /* hover:text-ink-* */
+  .hover\:text-ink-300:hover { color: rgb(var(--ink-300) / var(--tw-text-opacity, 1)); }
+  .hover\:text-ink-400:hover { color: rgb(var(--ink-400) / var(--tw-text-opacity, 1)); }
+  .hover\:text-ink-500:hover { color: rgb(var(--ink-500) / var(--tw-text-opacity, 1)); }
+  .hover\:text-ink-600:hover { color: rgb(var(--ink-600) / var(--tw-text-opacity, 1)); }
+  .hover\:text-ink-700:hover { color: rgb(var(--ink-700) / var(--tw-text-opacity, 1)); }
+  .hover\:text-ink-800:hover { color: rgb(var(--ink-800) / var(--tw-text-opacity, 1)); }
+
+  /* hover:bg-ink-* */
+  .hover\:bg-ink-100:hover { background-color: rgb(var(--ink-100) / var(--tw-bg-opacity, 1)); }
+  .hover\:bg-ink-200:hover { background-color: rgb(var(--ink-200) / var(--tw-bg-opacity, 1)); }
+  .hover\:bg-ink-300:hover { background-color: rgb(var(--ink-300) / var(--tw-bg-opacity, 1)); }
+
+  /* hover:border-ink-* */
+  .hover\:border-ink-300:hover { border-color: rgb(var(--ink-300) / var(--tw-border-opacity, 1)); }
+  .hover\:border-ink-400:hover { border-color: rgb(var(--ink-400) / var(--tw-border-opacity, 1)); }
+
+  /* 透明度变体 - ink */
+  .bg-ink-100\/40 { background-color: rgb(var(--ink-100) / 0.4); }
+  .bg-ink-100\/50 { background-color: rgb(var(--ink-100) / 0.5); }
+  .bg-ink-200\/50 { background-color: rgb(var(--ink-200) / 0.5); }
+  .hover\:bg-ink-200\/50:hover { background-color: rgb(var(--ink-200) / 0.5); }
+
+  /* accent 颜色 */
+  .text-accent-magenta { color: rgb(var(--accent-magenta) / var(--tw-text-opacity, 1)); }
+  .text-accent-periwinkle { color: rgb(var(--accent-periwinkle) / var(--tw-text-opacity, 1)); }
+  .bg-accent-magenta { background-color: rgb(var(--accent-magenta) / var(--tw-bg-opacity, 1)); }
+  .bg-accent-periwinkle { background-color: rgb(var(--accent-periwinkle) / var(--tw-bg-opacity, 1)); }
+  .border-accent-magenta { border-color: rgb(var(--accent-magenta) / var(--tw-border-opacity, 1)); }
+  .border-accent-periwinkle { border-color: rgb(var(--accent-periwinkle) / var(--tw-border-opacity, 1)); }
+
+  /* accent 透明度变体 */
+  .bg-accent-periwinkle\/15 { background-color: rgb(var(--accent-periwinkle) / 0.15); }
+  .bg-accent-periwinkle\/20 { background-color: rgb(var(--accent-periwinkle) / 0.2); }
+  .bg-accent-periwinkle\/25 { background-color: rgb(var(--accent-periwinkle) / 0.25); }
+  .bg-accent-periwinkle\/30 { background-color: rgb(var(--accent-periwinkle) / 0.3); }
+  .border-accent-periwinkle\/60 { border-color: rgb(var(--accent-periwinkle) / 0.6); }
+  .hover\:bg-accent-periwinkle\/25:hover { background-color: rgb(var(--accent-periwinkle) / 0.25); }
+
+  /* semantic 颜色 */
+  .text-semantic-success { color: rgb(var(--semantic-success) / var(--tw-text-opacity, 1)); }
+  .text-semantic-warning { color: rgb(var(--semantic-warning) / var(--tw-text-opacity, 1)); }
+  .text-semantic-error { color: rgb(var(--semantic-error) / var(--tw-text-opacity, 1)); }
+  .bg-semantic-success { background-color: rgb(var(--semantic-success) / var(--tw-bg-opacity, 1)); }
+  .bg-semantic-warning { background-color: rgb(var(--semantic-warning) / var(--tw-bg-opacity, 1)); }
+  .bg-semantic-error { background-color: rgb(var(--semantic-error) / var(--tw-bg-opacity, 1)); }
+  .border-semantic-success { border-color: rgb(var(--semantic-success) / var(--tw-border-opacity, 1)); }
+  .border-semantic-warning { border-color: rgb(var(--semantic-warning) / var(--tw-border-opacity, 1)); }
+  .border-semantic-error { border-color: rgb(var(--semantic-error) / var(--tw-border-opacity, 1)); }
+
+  /* semantic 透明度变体 */
+  .border-semantic-warning\/60 { border-color: rgb(var(--semantic-warning) / 0.6); }
+  .bg-semantic-warning\/15 { background-color: rgb(var(--semantic-warning) / 0.15); }
+
+  /* focus:border-ink-* */
+  .focus\:border-ink-400:focus { border-color: rgb(var(--ink-400) / var(--tw-border-opacity, 1)); }
+  .focus\:border-ink-500:focus { border-color: rgb(var(--ink-500) / var(--tw-border-opacity, 1)); }
+}

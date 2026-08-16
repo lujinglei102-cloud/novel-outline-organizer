@@ -1,4 +1,18 @@
 /** @type {import('tailwindcss').Config} */
+
+// 使用函数方式定义颜色，避免 Tailwind 在构建时尝试解析 var() 导致回退到默认灰色
+function cssVar(name) {
+  return ({ opacityVariable, opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgb(var(${name}) / ${opacityValue})`
+    }
+    if (opacityVariable !== undefined) {
+      return `rgb(var(${name}) / var(${opacityVariable}, 1))`
+    }
+    return `rgb(var(${name}))`
+  }
+}
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
@@ -9,25 +23,25 @@ export default {
       },
       colors: {
         ink: {
-          50: 'rgb(var(--ink-50) / <alpha-value>)',
-          100: 'rgb(var(--ink-100) / <alpha-value>)',
-          200: 'rgb(var(--ink-200) / <alpha-value>)',
-          300: 'rgb(var(--ink-300) / <alpha-value>)',
-          400: 'rgb(var(--ink-400) / <alpha-value>)',
-          500: 'rgb(var(--ink-500) / <alpha-value>)',
-          600: 'rgb(var(--ink-600) / <alpha-value>)',
-          700: 'rgb(var(--ink-700) / <alpha-value>)',
-          800: 'rgb(var(--ink-800) / <alpha-value>)',
-          900: 'rgb(var(--ink-900) / <alpha-value>)',
+          50: cssVar('--ink-50'),
+          100: cssVar('--ink-100'),
+          200: cssVar('--ink-200'),
+          300: cssVar('--ink-300'),
+          400: cssVar('--ink-400'),
+          500: cssVar('--ink-500'),
+          600: cssVar('--ink-600'),
+          700: cssVar('--ink-700'),
+          800: cssVar('--ink-800'),
+          900: cssVar('--ink-900'),
         },
         accent: {
-          magenta: 'rgb(var(--accent-magenta) / <alpha-value>)',
-          periwinkle: 'rgb(var(--accent-periwinkle) / <alpha-value>)',
+          magenta: cssVar('--accent-magenta'),
+          periwinkle: cssVar('--accent-periwinkle'),
         },
         semantic: {
-          success: 'rgb(var(--semantic-success) / <alpha-value>)',
-          warning: 'rgb(var(--semantic-warning) / <alpha-value>)',
-          error: 'rgb(var(--semantic-error) / <alpha-value>)',
+          success: cssVar('--semantic-success'),
+          warning: cssVar('--semantic-warning'),
+          error: cssVar('--semantic-error'),
         },
       },
       screens: {
