@@ -46,7 +46,7 @@ export function StructureNodesEditor({
                 'group flex items-center gap-1 rounded border px-3 py-1.5 text-sm ' +
                 (active
                   ? 'border-ink-900 bg-ink-900 text-white'
-                  : 'border-ink-200 bg-white hover:border-ink-400 cursor-pointer')
+                  : 'border-ink-300 cyber-surface hover:border-ink-400 cursor-pointer')
               }
             >
               {editing === idx ? (
@@ -81,7 +81,7 @@ export function StructureNodesEditor({
                 <span
                   className={
                     'ml-1 rounded px-1 text-xs ' +
-                    (active ? 'bg-white/20' : 'bg-ink-50 text-ink-500')
+                    (active ? 'bg-white/20' : 'bg-ink-100/50 text-ink-500')
                   }
                 >
                   {b.count ?? 0}张
@@ -135,7 +135,7 @@ export function StructureNodesEditor({
             }
           }}
           placeholder={addLabel}
-          className="w-48 rounded border border-ink-200 px-2 py-1 text-sm"
+          className="w-48 rounded border border-ink-400 cyber-input px-2 py-1 text-sm"
         />
         <button
           onClick={() => {
@@ -144,7 +144,7 @@ export function StructureNodesEditor({
               setNewName('')
             }
           }}
-          className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50"
+          className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50"
         >
           + 添加
         </button>

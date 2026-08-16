@@ -8,7 +8,7 @@ import { ExportPage } from '@/routes/ExportPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-white text-ink-900">
+      <div className="min-h-screen relative z-10 text-ink-800">
         <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-4">
           <Routes>

@@ -57,11 +57,11 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
       onClick={onCancel}
     >
       <div
-        className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded bg-white p-5 shadow-lg"
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded cyber-modal p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold">
+          <h2 className="text-base font-semibold neon-text">
             {initial ? '编辑灵感卡片' : '新建灵感卡片'}
           </h2>
           <button onClick={onCancel} className="text-ink-400 hover:text-ink-700">
@@ -79,7 +79,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
           autoFocus
           value={title}
           onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE_LEN))}
-          className="mb-1 w-full rounded border border-ink-200 px-2 py-1.5 text-sm font-medium focus:outline-none focus:border-ink-500"
+          className="mb-1 w-full rounded border border-ink-400 cyber-input px-2 py-1.5 text-sm font-medium"
           placeholder="给这条灵感起个标题…"
         />
         <div className="mb-3 text-right text-xs text-ink-400">剩余 {remainingTitle} 字</div>
@@ -92,7 +92,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
           data-testid="card-content-input"
           value={content}
           onChange={(e) => setContent(e.target.value.slice(0, MAX_BODY_LEN))}
-          className="h-28 w-full resize-none rounded border border-ink-200 p-2 text-sm focus:outline-none focus:border-ink-500"
+          className="h-28 w-full resize-none rounded border border-ink-400 cyber-input p-2 text-sm"
           placeholder="详细描述这个灵感……"
         />
         <div className="mt-1 text-right text-xs text-ink-400">剩余 {remainingBody} 字</div>
@@ -169,7 +169,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
           >
             取消
           </button>
@@ -177,7 +177,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
             data-testid="card-save-btn"
             onClick={handleSave}
             disabled={!hasInput}
-            className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white disabled:opacity-40"
+            className="rounded cyber-btn px-4 py-1.5 text-sm disabled:opacity-40"
           >
             保存
           </button>

@@ -4,15 +4,165 @@
 
 :root {
   font-family: '宋体', 'SimSun', sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background-color: #ffffff;
-  color: #0d0d0d;
+  /* 赛博朋克渐变背景 */
+  background: linear-gradient(180deg, #0A0B2E 0%, #1E1B4B 40%, #3B2C7A 75%, #6366F1 100%);
+  background-attachment: fixed;
+  color: #E0E7FF;
+  min-height: 100vh;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* CRT 扫描线效果 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.06) 0px,
+    rgba(0, 0, 0, 0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.5;
+}
+
+/* 星空漂移氛围 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 60% 70%, rgba(168,85,247,0.3), transparent),
+    radial-gradient(1px 1px at 80% 20%, rgba(34,211,238,0.3), transparent),
+    radial-gradient(2px 2px at 40% 80%, rgba(255,255,255,0.2), transparent),
+    radial-gradient(1px 1px at 90% 50%, rgba(236,72,153,0.2), transparent);
+  background-size: 200% 200%;
+  animation: starDrift 30s linear infinite;
+}
+
+@keyframes starDrift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* 霓虹文字光晕 */
+.neon-text {
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.8), 0 0 16px rgba(168, 85, 247, 0.4);
+}
+
+.neon-text-cyan {
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.8), 0 0 16px rgba(34, 211, 238, 0.4);
+}
+
+.neon-text-gold {
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.8), 0 0 16px rgba(251, 191, 36, 0.4);
+}
+
+/* 赛博朋克按钮（替代 bg-ink-800 text-white） */
+.cyber-btn {
+  background: linear-gradient(180deg, #6366F1, #4338CA);
+  border: 2px solid #0A0B2E;
+  color: #F0F9FF;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 150ms ease;
+}
+.cyber-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.8), 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.cyber-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6), inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.cyber-btn:disabled {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+/* 赛博朋克卡片表面（替代 bg-white） */
+.cyber-surface {
+  background: rgba(30, 27, 75, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid #312E81;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 赛博朋克弹窗（替代 bg-white shadow-lg） */
+.cyber-modal {
+  background: rgba(15, 16, 53, 0.95);
+  backdrop-filter: blur(12px);
+  border: 2px solid #6366F1;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.4), 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* 霓虹边框 */
+.neon-border {
+  border: 1px solid #6366F1;
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.4);
+}
+
+/* 像素风输入框 */
+.cyber-input {
+  background: rgba(10, 11, 46, 0.6);
+  border: 1px solid #4338CA;
+  color: #E0E7FF;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.cyber-input:focus {
+  border-color: #A855F7;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+  outline: none;
+}
+.cyber-input::placeholder {
+  color: #6366F1;
+  opacity: 0.6;
+}
+
+/* 赛博朋克标签 */
+.cyber-tab-active {
+  background: linear-gradient(180deg, #6366F1, #4338CA);
+  color: #F0F9FF;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0B2E;
+}
+::-webkit-scrollbar-thumb {
+  background: #4338CA;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6366F1;
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+  }
+  .cyber-btn:hover:not(:disabled) {
+    transform: none;
+  }
 }

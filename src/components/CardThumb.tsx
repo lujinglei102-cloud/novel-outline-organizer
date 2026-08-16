@@ -36,10 +36,10 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       data-testid="card-thumb"
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      className="cursor-pointer rounded border border-ink-200 bg-white p-3 transition hover:-translate-y-0.5 hover:shadow-md"
+      className="cursor-pointer rounded border border-ink-300 cyber-surface p-3 transition hover:-translate-y-0.5 hover:shadow-md"
     >
       {/* 标题 */}
-      <p className="mb-1 text-sm font-semibold text-ink-800 line-clamp-1">
+      <p className="mb-1 text-sm font-semibold text-ink-800 neon-text line-clamp-1">
         {displayTitle}
       </p>
 
@@ -61,22 +61,22 @@ export function CardThumb({ card, characterName, onClick, onDoubleClick, mobile 
       {/* 标签栏 */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {characterName && (
-          <span className="rounded border border-ink-200 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
             #{characterName}
           </span>
         )}
         {card.stage && card.stage !== 'none' && (
-          <span className="rounded border border-ink-200 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
             [{stageLabel[card.stage]}]
           </span>
         )}
         {card.isForeshadow && (
-          <span className="rounded border border-purple-300 bg-purple-50 px-1.5 py-0.5 text-xs text-purple-700">
+          <span className="rounded border border-purple-500 bg-purple-900/40 px-1.5 py-0.5 text-xs text-purple-300">
             🔖伏笔
           </span>
         )}
         {typeof card.emotion === 'number' && card.emotion !== 0 && (
-          <span className="rounded border border-ink-200 px-1.5 py-0.5 text-xs text-ink-600">
+          <span className="rounded border border-ink-300 px-1.5 py-0.5 text-xs text-ink-600">
             情绪{card.emotion > 0 ? '+' : ''}{card.emotion}
           </span>
         )}

@@ -68,7 +68,7 @@ export function CardsPage() {
           </select>
           <button
             onClick={() => setShowNewBook(!showNewBook)}
-            className="rounded border border-ink-300 px-3 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-3 py-1.5 text-sm hover:bg-ink-200/50"
           >
             + 新建书籍
           </button>
@@ -87,7 +87,7 @@ export function CardsPage() {
               <button
                 data-testid="new-book-confirm"
                 onClick={handleCreateBook}
-                className="rounded bg-ink-800 px-3 py-1.5 text-sm text-white hover:bg-ink-700"
+                className="rounded cyber-btn px-3 py-1.5 text-sm"
               >
                 确定
               </button>
@@ -97,13 +97,13 @@ export function CardsPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowCreate(true)}
-            className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700"
+            className="rounded cyber-btn px-4 py-1.5 text-sm"
           >
             + 新卡片
           </button>
           <button
             onClick={handleSort}
-            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
           >
             一键梳理 →
           </button>
@@ -121,7 +121,7 @@ export function CardsPage() {
       {loading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded border border-ink-100 bg-ink-50" />
+            <div key={i} className="h-32 animate-pulse rounded border border-ink-100 bg-ink-100/50" />
           ))}
         </div>
       ) : visible.length === 0 ? (

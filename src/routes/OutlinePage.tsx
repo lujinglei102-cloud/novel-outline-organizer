@@ -95,14 +95,14 @@ export function OutlinePage() {
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/sort')}
-            className="rounded border border-ink-200 px-3 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-3 py-1.5 text-sm hover:bg-ink-200/50"
           >
             ← 返回阶段二
           </button>
           <button
             onClick={() => navigate('/export')}
             disabled={chapters.length === 0}
-            className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700 disabled:opacity-40"
+            className="rounded cyber-btn px-4 py-1.5 text-sm disabled:opacity-40"
           >
             导出大纲 →
           </button>
@@ -116,12 +116,12 @@ export function OutlinePage() {
       ) : (
         <div className="space-y-5">
           {/* 方向（模板）选择 */}
-          <section className="rounded border border-ink-200 bg-white p-4">
+          <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-ink-800">① 骨架方向（按模板自动分界）</h2>
+              <h2 className="text-sm font-semibold text-ink-800 neon-text">① 骨架方向（按模板自动分界）</h2>
               <button
                 onClick={() => runSkeletonDirections()}
-                className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50"
+                className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50"
               >
                 ↻ 重新生成方向
               </button>
@@ -145,15 +145,15 @@ export function OutlinePage() {
                         className={
                           'rounded border px-3 py-1.5 text-left text-xs transition ' +
                           (i === selectedDirectionIdx
-                            ? 'border-ink-800 bg-ink-800 text-white'
-                            : 'border-ink-200 hover:border-ink-400')
+                            ? 'cyber-tab-active'
+                            : 'border-ink-300 hover:border-ink-400')
                         }
                       >
                         <div className="font-medium">方案 {i + 1}：{tplName}</div>
                         <div
                           className={
                             'mt-0.5 ' +
-                            (i === selectedDirectionIdx ? 'text-white/70' : 'text-ink-500')
+                            (i === selectedDirectionIdx ? 'text-ink-700' : 'text-ink-500')
                           }
                         >
                           节点比例：
@@ -164,7 +164,7 @@ export function OutlinePage() {
                   })}
                 </div>
                 {activeDir && (
-                  <div className="grid grid-cols-1 gap-2 rounded bg-ink-50 p-3 sm:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-2 rounded bg-ink-100/50 p-3 sm:grid-cols-4">
                     {activeNodes.map((n, idx) => {
                       const from = idx === 0 ? 0 : activeDir.boundaries[idx - 1] ?? 0
                       const to = activeDir.boundaries[idx] ?? totalCardCount
@@ -172,7 +172,7 @@ export function OutlinePage() {
                       return (
                         <div
                           key={idx}
-                          className="rounded border border-ink-200 bg-white p-2 text-xs"
+                          className="rounded border border-ink-300 cyber-surface p-2 text-xs"
                         >
                           <div className="mb-1 font-semibold">{n}</div>
                           <div className="text-ink-500">
@@ -191,8 +191,8 @@ export function OutlinePage() {
           </section>
 
           {/* 结构节点编辑器（可改名/加/删） */}
-          <section className="rounded border border-ink-200 bg-white p-4">
-            <h2 className="mb-2 text-sm font-semibold text-ink-800">
+          <section className="rounded border border-ink-300 cyber-surface p-4">
+            <h2 className="mb-2 text-sm font-semibold text-ink-800 neon-text">
               ② 结构节点（可改名/增删，对应起承转合等）
             </h2>
             <StructureNodesEditor
@@ -215,14 +215,14 @@ export function OutlinePage() {
           </section>
 
           {/* 情绪曲线（含理想曲线对比） */}
-          <section className="rounded border border-ink-200 bg-white p-4">
+          <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-ink-800">
+              <h2 className="text-sm font-semibold text-ink-800 neon-text">
                 ③ 情绪冲突曲线：情绪值 + 冲突强度
               </h2>
               <button
                 onClick={() => runEmotionRetag()}
-                className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50"
+                className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50"
               >
                 ↻ 重新打情绪标
               </button>
@@ -246,9 +246,9 @@ export function OutlinePage() {
           </section>
 
           {/* 生成章节 */}
-          <section className="rounded border border-ink-200 bg-white p-4">
+          <section className="rounded border border-ink-300 cyber-surface p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <h2 className="text-sm font-semibold text-ink-800 mr-auto">
+              <h2 className="text-sm font-semibold text-ink-800 neon-text mr-auto">
                 ④ 章节规划（每个节点生成 N 章）
               </h2>
               <label className="flex items-center gap-1 text-xs text-ink-500">
@@ -256,7 +256,7 @@ export function OutlinePage() {
                 <select
                   value={perNode}
                   onChange={(e) => setPerNode(parseInt(e.target.value))}
-                  className="rounded border border-ink-200 px-1.5 py-0.5 text-xs"
+                  className="rounded border border-ink-300 px-1.5 py-0.5 text-xs"
                 >
                   {[1, 2, 3, 4, 5].map((v) => (
                     <option key={v} value={v}>
@@ -267,7 +267,7 @@ export function OutlinePage() {
               </label>
               <button
                 onClick={() => applyChaptersFromDirection(perNode)}
-                className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50"
+                className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50"
               >
                 按方向重新生成章节
               </button>
@@ -324,21 +324,21 @@ export function OutlinePage() {
           onClick={() => setEditingChapter(null)}
         >
           <div
-            className="w-full max-w-lg rounded bg-white p-5 shadow-lg"
+            className="w-full max-w-lg rounded cyber-modal p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-3 text-base font-semibold">
+            <h3 className="mb-3 text-base font-semibold neon-text">
               编辑章节 · 第 {editingChapter.index + 1} 章 · {editingChapter.nodeId}
             </h3>
             <label className="mb-1 block text-xs text-ink-500">章节标题</label>
             <input
-              className="mb-3 w-full rounded border border-ink-200 px-2 py-1.5 text-sm"
+              className="mb-3 w-full rounded border border-ink-300 px-2 py-1.5 text-sm"
               value={draftTitle}
               onChange={(e) => setDraftTitle(e.target.value)}
             />
             <label className="mb-1 block text-xs text-ink-500">章节核心冲突（一句话）</label>
             <textarea
-              className="mb-4 h-24 w-full rounded border border-ink-200 p-2 text-sm"
+              className="mb-4 h-24 w-full rounded border border-ink-300 p-2 text-sm"
               value={draftConflict}
               onChange={(e) => setDraftConflict(e.target.value)}
             />
@@ -348,7 +348,7 @@ export function OutlinePage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setEditingChapter(null)}
-                className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+                className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
               >
                 取消
               </button>
@@ -360,7 +360,7 @@ export function OutlinePage() {
                   })
                   setEditingChapter(null)
                 }}
-                className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700"
+                className="rounded cyber-btn px-4 py-1.5 text-sm"
               >
                 保存
               </button>
@@ -403,7 +403,7 @@ function ChapterCard({
     .filter(Boolean) as ChapterCardData[]
   const foreshadowCount = cards.filter((c) => c.isForeshadow).length
   return (
-    <div className="rounded border border-ink-200 bg-ink-50/40 p-3">
+    <div className="rounded border border-ink-300 bg-ink-100/40 p-3">
       <div className="mb-2 flex items-start gap-3">
         <div className="mt-0.5 text-xs font-semibold text-ink-500">
           第 {chapter.index + 1} 章
@@ -414,14 +414,14 @@ function ChapterCard({
         </div>
         <button
           onClick={onViewEmotion}
-          className="rounded border border-ink-200 px-2 py-0.5 text-xs hover:bg-ink-50"
+          className="rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-200/50"
           title="查看本章情绪起伏与伏笔标注"
         >
           📊 情绪/伏笔
         </button>
         <button
           onClick={onEdit}
-          className="rounded border border-ink-200 px-2 py-0.5 text-xs hover:bg-ink-50"
+          className="rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-200/50"
         >
           编辑
         </button>
@@ -434,7 +434,7 @@ function ChapterCard({
         </div>
       )}
       {foreshadowCount > 0 && (
-        <div className="mt-2 text-xs text-purple-600">🔖 本章含 {foreshadowCount} 条伏笔标注</div>
+        <div className="mt-2 text-xs text-purple-400">🔖 本章含 {foreshadowCount} 条伏笔标注</div>
       )}
     </div>
   )
@@ -464,11 +464,11 @@ function ChapterEmotionForeshadowModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded bg-white p-5 shadow-lg"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded cyber-modal p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-base font-semibold">
+          <h3 className="text-base font-semibold neon-text">
             📊 第 {chapter.index + 1} 章 · 情绪起伏与伏笔标注
           </h3>
           <button onClick={onClose} className="text-ink-400 hover:text-ink-700">
@@ -486,30 +486,30 @@ function ChapterEmotionForeshadowModal({
           <>
             {/* 情绪统计概览 */}
             <div className="mb-3 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="rounded border border-ink-200 bg-ink-50 p-2">
+              <div className="rounded border border-ink-300 bg-ink-100/50 p-2">
                 <div className="text-ink-400">平均情绪</div>
                 <div className="text-base font-semibold text-ink-800">{avgEmotion}</div>
               </div>
-              <div className="rounded border border-green-200 bg-green-50 p-2">
+              <div className="rounded border border-green-500/40 bg-green-900/20 p-2">
                 <div className="text-ink-400">最高情绪</div>
-                <div className="text-base font-semibold text-green-700">+{maxEmotion}</div>
+                <div className="text-base font-semibold text-green-400">+{maxEmotion}</div>
               </div>
-              <div className="rounded border border-red-200 bg-red-50 p-2">
+              <div className="rounded border border-red-500/40 bg-red-900/20 p-2">
                 <div className="text-ink-400">最低情绪</div>
-                <div className="text-base font-semibold text-red-700">{minEmotion}</div>
+                <div className="text-base font-semibold text-red-400">{minEmotion}</div>
               </div>
             </div>
 
             {/* 情绪曲线 */}
             <div className="mb-4">
-              <h4 className="mb-2 text-sm font-semibold text-ink-700">情绪起伏曲线</h4>
+              <h4 className="mb-2 text-sm font-semibold text-ink-700 neon-text">情绪起伏曲线</h4>
               <EmotionCurve xLabels={xLabels} values={stats.emotions} conflictValues={stats.intensities} height={240} />
             </div>
 
             {/* 伏笔标注 */}
             <div className="mb-2">
               <div className="mb-2 flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-ink-700">🔖 伏笔标注</h4>
+                <h4 className="text-sm font-semibold text-ink-700 neon-text">🔖 伏笔标注</h4>
                 {foreshadowCards.length > 0 && (
                   <span className="text-xs text-ink-500">
                     共 {foreshadowCards.length} 条
@@ -520,7 +520,7 @@ function ChapterEmotionForeshadowModal({
                 )}
               </div>
               {foreshadowCards.length === 0 ? (
-                <p className="rounded border border-dashed border-ink-200 p-4 text-center text-xs text-ink-400">
+                <p className="rounded border border-dashed border-ink-300 p-4 text-center text-xs text-ink-400">
                   本章无伏笔标注
                 </p>
               ) : (
@@ -532,7 +532,7 @@ function ChapterEmotionForeshadowModal({
                         key={c.id}
                         className={
                           'rounded border p-2 text-xs ' +
-                          (resolved ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50')
+                          (resolved ? 'border-green-500/60 bg-green-900/30' : 'border-red-500/60 bg-red-900/30')
                         }
                       >
                         <div className="flex items-center gap-2">
@@ -542,8 +542,8 @@ function ChapterEmotionForeshadowModal({
                             className={
                               'ml-auto rounded px-1.5 py-0.5 text-[10px] ' +
                               (resolved
-                                ? 'bg-green-200 text-green-800'
-                                : 'bg-red-200 text-red-800')
+                                ? 'bg-green-700/50 text-green-200'
+                                : 'bg-red-700/50 text-red-200')
                             }
                           >
                             {resolved ? '已回收' : '未回收'}
@@ -561,21 +561,21 @@ function ChapterEmotionForeshadowModal({
 
             {/* 卡片情绪明细 */}
             <div>
-              <h4 className="mb-2 text-sm font-semibold text-ink-700">卡片情绪明细</h4>
+              <h4 className="mb-2 text-sm font-semibold text-ink-700 neon-text">卡片情绪明细</h4>
               <ul className="space-y-1">
                 {cards.map((c, i) => (
-                  <li key={c.id} className="flex items-center gap-2 rounded bg-ink-50 p-1.5 text-xs">
+                  <li key={c.id} className="flex items-center gap-2 rounded bg-ink-100/50 p-1.5 text-xs">
                     <span className="text-ink-400">#{i + 1}</span>
                     <span className="flex-1 truncate text-ink-700">
                       {c.title?.trim() || '（无标题）'}
                     </span>
-                    {c.isForeshadow && <span className="text-purple-600">🔖</span>}
+                    {c.isForeshadow && <span className="text-purple-400">🔖</span>}
                     <span
                       className={
                         'rounded px-1.5 py-0.5 text-[10px] ' +
                         ((c.emotion ?? 0) >= 0
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700')
+                          ? 'bg-green-900/40 text-green-400'
+                          : 'bg-red-900/40 text-red-400')
                       }
                     >
                       情绪 {c.emotion ?? 0}
@@ -590,7 +590,7 @@ function ChapterEmotionForeshadowModal({
         <div className="mt-4 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
           >
             关闭
           </button>

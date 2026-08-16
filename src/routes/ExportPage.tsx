@@ -37,7 +37,7 @@ export function ExportPage() {
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/outline')}
-            className="rounded border border-ink-200 px-3 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-3 py-1.5 text-sm hover:bg-ink-200/50"
           >
             ← 返回编辑
           </button>
@@ -54,7 +54,7 @@ export function ExportPage() {
           <div className="mt-3">
             <button
               onClick={() => navigate('/outline')}
-              className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700"
+              className="rounded cyber-btn px-4 py-1.5 text-sm"
             >
               去构建骨架 →
             </button>
@@ -70,14 +70,14 @@ export function ExportPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <article className="rounded border border-ink-200 bg-white p-5">
-              <h3 className="mb-2 text-sm font-semibold text-ink-700">Markdown 预览</h3>
+            <article className="rounded border border-ink-300 cyber-surface p-5">
+              <h3 className="mb-2 text-sm font-semibold text-ink-700 neon-text">Markdown 预览</h3>
               <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-800 max-h-[70vh] overflow-auto">
                 {md}
               </pre>
             </article>
-            <article className="rounded border border-ink-200 bg-white p-5">
-              <h3 className="mb-2 text-sm font-semibold text-ink-700">纯文本预览</h3>
+            <article className="rounded border border-ink-300 cyber-surface p-5">
+              <h3 className="mb-2 text-sm font-semibold text-ink-700 neon-text">纯文本预览</h3>
               <pre className="whitespace-pre-wrap text-xs leading-6 text-ink-800 max-h-[70vh] overflow-auto">
                 {txt}
               </pre>
@@ -111,7 +111,7 @@ function DownloadBtn({
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       }}
-      className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700"
+      className="rounded cyber-btn px-4 py-1.5 text-sm"
     >
       {label}
     </button>
@@ -138,7 +138,7 @@ function CopyBtn({ content, label }: { content: string; label: string }) {
           setTimeout(() => setOk(false), 1500)
         }
       }}
-      className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+      className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
     >
       {ok ? '✓ 已复制' : label}
     </button>

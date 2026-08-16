@@ -89,13 +89,13 @@ export function SortPage() {
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/cards')}
-            className="rounded border border-ink-200 px-3 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-3 py-1.5 text-sm hover:bg-ink-200/50"
           >
             ← 返回阶段一
           </button>
           <button
             onClick={() => navigate('/outline')}
-            className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white hover:bg-ink-700"
+            className="rounded cyber-btn px-4 py-1.5 text-sm"
           >
             进入骨架构建 →
           </button>
@@ -103,7 +103,7 @@ export function SortPage() {
       </div>
 
       {/* Tab Header */}
-      <div className="mb-3 flex gap-1 border-b border-ink-200">
+      <div className="mb-3 flex gap-1 border-b border-ink-300">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -207,7 +207,7 @@ function NarrativeLineView({
           <button
             onClick={onGotoEmotion}
             disabled={cards.length === 0}
-            className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 disabled:opacity-40"
+            className="rounded cyber-btn px-3 py-1 text-xs disabled:opacity-40"
           >
             一键情绪标注 →
           </button>
@@ -220,7 +220,7 @@ function NarrativeLineView({
                 setRuning(false)
               }
             }}
-            className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+            className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50 disabled:opacity-50"
             disabled={runing}
           >
             ↻ 重新排序
@@ -228,7 +228,7 @@ function NarrativeLineView({
         </div>
       </div>
       {cards.length === 0 ? (
-        <div className="rounded border border-dashed border-ink-200 p-8 text-center text-sm text-ink-500">
+        <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-500">
           暂无卡片，请先在阶段一录入灵感
         </div>
       ) : (
@@ -268,12 +268,12 @@ function NarrativeLineView({
                   className={
                     'flex items-start gap-3 rounded border p-3 transition cursor-grab active:cursor-grabbing ' +
                     (isDragging
-                      ? 'border-blue-500 bg-blue-50 opacity-50 '
+                      ? 'border-blue-500 bg-cyan-900/30 opacity-50 '
                       : isOver
-                      ? 'border-green-500 bg-green-50 '
+                      ? 'border-green-500 bg-green-900/30 '
                       : isHi
-                      ? 'border-blue-400 bg-blue-50'
-                      : 'border-ink-200 bg-white hover:bg-ink-50')
+                      ? 'border-blue-400 bg-cyan-900/30'
+                      : 'border-ink-300 cyber-surface hover:bg-ink-200/50')
                   }
                 >
                   <span className="mt-1 w-6 flex-shrink-0 text-right text-xs text-ink-400 select-none">
@@ -288,7 +288,7 @@ function NarrativeLineView({
                     className={
                       'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
                       (tp.severity === 'high'
-                        ? 'border-red-500 bg-red-50 text-red-700'
+                        ? 'border-red-500 bg-red-900/30 text-red-400'
                         : 'border-orange-400 bg-orange-50 text-orange-700')
                     }
                   >
@@ -301,7 +301,7 @@ function NarrativeLineView({
                       'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
                       (gapHere.density === 'dense'
                         ? 'border-amber-400 bg-amber-50 text-amber-700'
-                        : 'border-red-400 bg-red-50 text-red-700')
+                        : 'border-red-400 bg-red-900/30 text-red-400')
                     }
                   >
                     💡 {gapHere.hint}
@@ -357,13 +357,13 @@ function CharactersView({
             }
           }}
           disabled={runing}
-          className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+          className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50 disabled:opacity-50"
         >
           ↻ 重新识别
         </button>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <aside className="rounded border border-ink-200 p-3 lg:col-span-1">
+        <aside className="rounded border border-ink-300 p-3 lg:col-span-1">
           {characters.length === 0 ? (
             <p className="text-center text-xs text-ink-400">暂无角色</p>
           ) : (
@@ -374,7 +374,7 @@ function CharactersView({
                   className={
                     'rounded border px-2.5 py-1.5 text-sm transition ' +
                     (selCharId === c.id
-                      ? 'border-ink-800 bg-ink-800 text-white'
+                      ? 'cyber-tab-active'
                       : 'border-ink-100 hover:border-ink-300')
                   }
                 >
@@ -404,7 +404,7 @@ function CharactersView({
                     <span
                       className={
                         'ml-2 flex-shrink-0 text-xs ' +
-                        (selCharId === c.id ? 'text-white/70' : 'text-ink-400')
+                        (selCharId === c.id ? 'text-ink-700' : 'text-ink-400')
                       }
                     >
                       ×{c.mentionCount}
@@ -421,8 +421,8 @@ function CharactersView({
                         }}
                         className={
                           selCharId === c.id
-                            ? 'text-blue-200 hover:text-blue-100'
-                            : 'text-blue-600 hover:underline'
+                            ? 'text-cyan-300 hover:text-blue-100'
+                            : 'text-cyan-400 hover:underline'
                         }
                       >
                         编辑
@@ -460,7 +460,7 @@ function CharactersView({
                     <div
                       className={
                         'mt-1 line-clamp-2 text-xs ' +
-                        (selCharId === c.id ? 'text-white/80' : 'text-ink-500')
+                        (selCharId === c.id ? 'text-ink-700' : 'text-ink-500')
                       }
                     >
                       「{c.representativeDesc}」
@@ -474,9 +474,9 @@ function CharactersView({
         <section className="lg:col-span-2">
           {selChar ? (
             <>
-              <h3 className="mb-2 text-base font-semibold">{selChar.name} 的出场卡片</h3>
+              <h3 className="mb-2 text-base font-semibold neon-text">{selChar.name} 的出场卡片</h3>
               {relatedCards.length === 0 ? (
-                <p className="rounded border border-dashed border-ink-200 p-6 text-center text-sm text-ink-500">
+                <p className="rounded border border-dashed border-ink-300 p-6 text-center text-sm text-ink-500">
                   该角色暂未分配卡片
                 </p>
               ) : (
@@ -536,7 +536,7 @@ function ForeshadowView({
             }
           }}
           disabled={runing}
-          className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+          className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50 disabled:opacity-50"
         >
           ↻ 重新识别
         </button>
@@ -545,7 +545,7 @@ function ForeshadowView({
       {/* 手动标记的伏笔 */}
       {manualForeshadowCards.length > 0 && (
         <div className="mb-4">
-          <h3 className="mb-2 text-sm font-semibold text-purple-700">🔖 手动标记的伏笔</h3>
+          <h3 className="mb-2 text-sm font-semibold text-purple-400 neon-text">🔖 手动标记的伏笔</h3>
           <ul className="space-y-2">
             {manualForeshadowCards.map((c) => {
               const resolved = c.foreshadowResolved
@@ -555,8 +555,8 @@ function ForeshadowView({
                   className={
                     'rounded border p-3 text-sm ' +
                     (resolved
-                      ? 'border-green-300 bg-green-50'
-                      : 'border-red-300 bg-red-50')
+                      ? 'border-green-500/60 bg-green-900/30'
+                      : 'border-red-500/60 bg-red-900/30')
                   }
                 >
                   <div className="flex items-center gap-2">
@@ -567,7 +567,7 @@ function ForeshadowView({
                     <button
                       data-testid={`resolve-card-${c.id}`}
                       onClick={() => onToggleForeshadowCard(c.id)}
-                      className="ml-auto rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-50"
+                      className="ml-auto rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-200/50"
                     >
                       {resolved ? '↩ 取消回收' : '✓ 确认回收'}
                     </button>
@@ -583,7 +583,7 @@ function ForeshadowView({
       {/* 自动识别的伏笔关联 */}
       <h3 className="mb-2 text-sm font-semibold text-ink-600">🔗 自动关联</h3>
       {visible.length === 0 ? (
-        <div className="rounded border border-dashed border-ink-200 p-8 text-center text-sm text-ink-500">
+        <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-500">
           暂未发现伏笔关联，尝试在卡片中加入共同的信物或关键词（如玉佩、日记、项链等）。
           <br />
           也可以在卡片编辑中手动标记为伏笔。
@@ -598,17 +598,17 @@ function ForeshadowView({
                 className={
                   'rounded border p-3 text-sm ' +
                   (resolved
-                    ? 'border-green-300 bg-green-50'
-                    : 'border-red-300 bg-red-50')
+                    ? 'border-green-500/60 bg-green-900/30'
+                    : 'border-red-500/60 bg-red-900/30')
                 }
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {!resolved && <span className="text-red-500 text-base">⚠️</span>}
-                  <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
+                  <span className="rounded bg-ink-100/50 px-2 py-0.5 text-xs text-ink-500">
                     #{l.cardAId.slice(0, 8)}
                   </span>
                   <span className="text-ink-400">⇌</span>
-                  <span className="rounded bg-ink-50 px-2 py-0.5 text-xs text-ink-500">
+                  <span className="rounded bg-ink-100/50 px-2 py-0.5 text-xs text-ink-500">
                     #{l.cardBId.slice(0, 8)}
                   </span>
                   <span className="ml-2 text-ink-800">共现词：{l.reason}</span>
@@ -621,7 +621,7 @@ function ForeshadowView({
                     <button
                       data-testid={`resolve-link-${l.id}`}
                       onClick={() => onToggleLinkResolved(l.id)}
-                      className="rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-50"
+                      className="rounded border border-ink-300 px-2 py-0.5 text-xs hover:bg-ink-200/50"
                     >
                       {resolved ? '↩ 取消' : '✓ 回收'}
                     </button>
@@ -639,14 +639,14 @@ function ForeshadowView({
 function Badge({ color, label }: { color: 'green' | 'gray' | 'amber' | 'red' | 'purple'; label: string }) {
   const cls =
     color === 'green'
-      ? 'border-green-300 text-green-700 bg-green-50'
+      ? 'border-green-500/60 text-green-400 bg-green-900/30'
       : color === 'amber'
       ? 'border-amber-300 text-amber-700 bg-amber-50'
       : color === 'red'
-      ? 'border-red-300 text-red-700 bg-red-50'
+      ? 'border-red-500/60 text-red-400 bg-red-900/30'
       : color === 'purple'
-      ? 'border-purple-300 text-purple-700 bg-purple-50'
-      : 'border-ink-200 text-ink-600 bg-ink-50'
+      ? 'border-purple-500/60 bg-purple-900/30 text-purple-400'
+      : 'border-ink-300 text-ink-600 bg-ink-100/50'
   return <span className={`rounded border px-2 py-0.5 text-xs ${cls}`}>{label}</span>
 }
 
@@ -683,7 +683,7 @@ function EmotionView({
         <p className="text-xs text-ink-500">
           已标注 {sortedCards.filter((c) => typeof c.emotion === 'number').length} /{' '}
           {sortedCards.length}
-          {autoTagged && <span className="ml-2 text-blue-500">· 当前为自动补标结果</span>}
+          {autoTagged && <span className="ml-2 text-cyan-400">· 当前为自动补标结果</span>}
         </p>
         <div className="flex items-center gap-2">
           <span className="group relative inline-flex">
@@ -706,7 +706,7 @@ function EmotionView({
                 }
               }}
               disabled={loading}
-              className="rounded border border-blue-300 bg-blue-50 px-3 py-1 text-xs text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+              className="rounded border-cyan-500/60 bg-cyan-900/30 px-3 py-1 text-xs text-cyan-300 hover:bg-cyan-800/40 disabled:opacity-50"
             >
               ↩ 恢复手动标注
             </button>
@@ -722,7 +722,7 @@ function EmotionView({
                 }
               }}
               disabled={loading}
-              className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+              className="rounded border border-ink-300 px-3 py-1 text-xs hover:bg-ink-200/50 disabled:opacity-50"
             >
               ↻ 自动补标
             </button>
@@ -730,7 +730,7 @@ function EmotionView({
         </div>
       </div>
 
-      <div className="mb-4 rounded border border-ink-200 p-2">
+      <div className="mb-4 rounded border border-ink-300 p-2">
         <EmotionCurve
           xLabels={xLabels}
           values={values}
@@ -760,8 +760,8 @@ function EmotionView({
               className={
                 'rounded border p-3 transition ' +
                 (isHi
-                  ? 'border-blue-400 bg-blue-50'
-                  : 'border-ink-200 bg-white hover:bg-ink-50')
+                  ? 'border-blue-400 bg-cyan-900/30'
+                  : 'border-ink-300 cyber-surface hover:bg-ink-200/50')
               }
             >
               <div className="mb-1 flex items-center gap-1 text-[10px] text-ink-400">
@@ -776,7 +776,7 @@ function EmotionView({
                     setEVal(c.emotion ?? 0)
                     setIVal(c.intensity ?? 1)
                   }}
-                  className="ml-auto text-xs text-blue-600 hover:underline"
+                  className="ml-auto text-xs text-cyan-400 hover:underline"
                 >
                   改
                 </button>
@@ -825,10 +825,10 @@ function EditEmotionDialog({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded bg-white p-5 shadow-lg"
+        className="w-full max-w-md rounded cyber-modal p-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-4 text-base font-semibold">修改情绪标注</h3>
+        <h3 className="mb-4 text-base font-semibold neon-text">修改情绪标注</h3>
         <div className="mb-3">
           <label className="mb-1 block text-xs text-ink-500">
             情绪值：{e}（-5 极度负面 / 0 中性 / 5 极度正面）
@@ -858,7 +858,7 @@ function EditEmotionDialog({
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded border border-ink-200 px-4 py-1.5 text-sm hover:bg-ink-50"
+            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
           >
             取消
           </button>
@@ -872,7 +872,7 @@ function EditEmotionDialog({
                 setBusy(false)
               }
             }}
-            className="rounded bg-ink-800 px-4 py-1.5 text-sm text-white disabled:opacity-50"
+            className="rounded cyber-btn px-4 py-1.5 text-sm disabled:opacity-50"
           >
             保存
           </button>
