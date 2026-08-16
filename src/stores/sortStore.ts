@@ -160,7 +160,7 @@ export const useSortStore = create<SortState>((set, get) => ({
   saveTagToCard: async (cardId, emotion, intensity) => {
     // 更新本地 state + DB 同步（为了用户确认过的标注）
     const updated = get().sortedCards.map((c) =>
-      c.id === cardId ? { ...c, emotion, intensity } : c,
+      c.id === cardId ? { ...c, emotion, intensity, emotionManual: true } : c,
     )
     set({
       sortedCards: updated,
@@ -168,7 +168,7 @@ export const useSortStore = create<SortState>((set, get) => ({
     })
     // DB
     const { updateCard } = await import('@/db/cardRepo')
-    await updateCard(cardId, { emotion, intensity })
+    await updateCard(cardId, { emotion, intensity, emotionManual: true })
   },
 
   runSkeletonDirections: async (preferredTemplateIds) => {

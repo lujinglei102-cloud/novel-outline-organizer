@@ -110,6 +110,8 @@ export function tagEmotion(text: string): { emotion: number; intensity: number; 
 
 export function retagAll(cards: Card[]): Card[] {
   return cards.map((c) => {
+    // 用户手动设置了情绪值的卡片不覆盖
+    if (c.emotionManual) return c
     const { emotion, intensity } = tagEmotion(c.content)
     return { ...c, emotion, intensity }
   })

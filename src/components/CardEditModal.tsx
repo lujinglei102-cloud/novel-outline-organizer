@@ -14,6 +14,7 @@ interface Props {
     stage?: Stage
     emotion?: number
     intensity?: number
+    emotionManual?: boolean
     isForeshadow?: boolean
   }) => void
   onCancel: () => void
@@ -44,6 +45,7 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
       stage,
       emotion,
       intensity,
+      emotionManual: true,
       isForeshadow,
     })
   }

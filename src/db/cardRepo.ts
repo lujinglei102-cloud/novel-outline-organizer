@@ -18,6 +18,7 @@ export async function addCard(input: {
   emotion?: number
   intensity?: number
   isForeshadow?: boolean
+  emotionManual?: boolean
 }): Promise<Card> {
   const now = Date.now()
   const card: Card = {
@@ -31,6 +32,7 @@ export async function addCard(input: {
     stage: input.stage ?? 'none',
     emotion: input.emotion ?? 0,
     intensity: input.intensity ?? 1,
+    emotionManual: input.emotionManual ?? false,
     isForeshadow: input.isForeshadow ?? false,
   }
   await db.cards.put(card)
@@ -39,7 +41,7 @@ export async function addCard(input: {
 
 export async function updateCard(
   id: string,
-  patch: Partial<Pick<Card, 'title' | 'content' | 'bookId' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'order' | 'isForeshadow' | 'foreshadowResolved'>>,
+  patch: Partial<Pick<Card, 'title' | 'content' | 'bookId' | 'characterId' | 'stage' | 'emotion' | 'intensity' | 'emotionManual' | 'order' | 'isForeshadow' | 'foreshadowResolved'>>,
 ): Promise<void> {
   const update: Record<string, unknown> = { updatedAt: Date.now() }
   if (patch.title !== undefined) update.title = patch.title.slice(0, 100)
@@ -49,6 +51,7 @@ export async function updateCard(
   if (patch.stage !== undefined) update.stage = patch.stage
   if (patch.emotion !== undefined) update.emotion = patch.emotion
   if (patch.intensity !== undefined) update.intensity = patch.intensity
+  if (patch.emotionManual !== undefined) update.emotionManual = patch.emotionManual
   if (patch.order !== undefined) update.order = patch.order
   if (patch.isForeshadow !== undefined) update.isForeshadow = patch.isForeshadow
   if (patch.foreshadowResolved !== undefined) update.foreshadowResolved = patch.foreshadowResolved

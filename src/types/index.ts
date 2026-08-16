@@ -21,6 +21,7 @@ export interface Card {
   stage?: Stage // 前期/中期/后期/未分类
   emotion?: number // -5..5
   intensity?: number // 1..5
+  emotionManual?: boolean // 用户是否手动设置了情绪值（true 时 retagAll 不覆盖）
   order?: number // 叙事线顺序
   isForeshadow?: boolean // 手动标记为伏笔
   foreshadowResolved?: boolean // 伏笔是否已回收
