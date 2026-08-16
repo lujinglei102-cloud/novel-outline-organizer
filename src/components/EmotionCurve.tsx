@@ -3,8 +3,8 @@ import * as echarts from 'echarts'
 
 interface Props {
   xLabels: string[] // x 轴显示，如卡片标题或序号
-  values: number[] // 情绪值 -5..5
-  intensity?: number[] // 强度 1..5 决定点大小
+  values: number[] // 情绪值 -5..5（左 Y 轴）
+  conflictValues?: number[] // 冲突强度 1..5（右 Y 轴，第二条曲线）
   idealCurve?: number[] // 模板理想情绪曲线
   onPointClick?: (idx: number) => void
   height?: number
@@ -13,7 +13,7 @@ interface Props {
 export function EmotionCurve({
   xLabels,
   values,
-  intensity,
+  conflictValues,
   idealCurve,
   onPointClick,
   height = 320,
@@ -40,16 +40,14 @@ export function EmotionCurve({
   useEffect(() => {
     const inst = chartRef.current
     if (!inst) return
-    const scatterSize = intensity
-      ? intensity.map((v) => 6 + (v - 1) * 3)
-      : values.map(() => 9)
+    const hasConflict = conflictValues && conflictValues.length > 0
 
     const series: any[] = [
       {
-        name: '实际情绪',
+        name: '情绪值',
         type: 'line',
         smooth: true,
-        symbolSize: (_val: number[], params: any) => scatterSize[params.dataIndex] ?? 9,
+        symbolSize: 8,
         showSymbol: true,
         itemStyle: { color: '#3b82f6' },
         lineStyle: { color: '#3b82f6', width: 2 },
@@ -62,28 +60,36 @@ export function EmotionCurve({
         data: values,
       },
     ]
+
+    if (hasConflict) {
+      series.push({
+        name: '冲突强度',
+        type: 'line',
+        smooth: true,
+        symbolSize: 7,
+        showSymbol: true,
+        itemStyle: { color: '#ef4444' },
+        lineStyle: { color: '#ef4444', width: 2, type: 'dashed' },
+        yAxisIndex: 1,
+        data: conflictValues,
+      })
+    }
+
     if (idealCurve && idealCurve.length) {
       series.push({
         name: '模板理想情绪',
         type: 'line',
         smooth: true,
         showSymbol: true,
+        symbolSize: 6,
         itemStyle: { color: '#f59e0b' },
-        lineStyle: { color: '#f59e0b', width: 2, type: 'dashed' },
+        lineStyle: { color: '#f59e0b', width: 2, type: 'dotted' },
         data: idealCurve,
       })
     }
-    inst.setOption({
-      tooltip: { trigger: 'axis' },
-      grid: { left: 40, right: 20, top: 30, bottom: 40 },
-      legend: idealCurve && idealCurve.length ? { top: 0, right: 0, icon: 'line' } : undefined,
-      xAxis: {
-        type: 'category',
-        data: xLabels,
-        axisLabel: { hideOverlap: true, color: '#595959', fontSize: 11 },
-        axisTick: { show: false },
-      },
-      yAxis: {
+
+    const yAxes: any[] = [
+      {
         type: 'value',
         min: -5,
         max: 5,
@@ -93,9 +99,34 @@ export function EmotionCurve({
         name: '情绪值',
         nameTextStyle: { color: '#8c8c8c', fontSize: 11 },
       },
+    ]
+    if (hasConflict) {
+      yAxes.push({
+        type: 'value',
+        min: 0,
+        max: 5,
+        interval: 1,
+        splitLine: { show: false },
+        axisLabel: { color: '#ef4444' },
+        name: '冲突强度',
+        nameTextStyle: { color: '#ef4444', fontSize: 11 },
+      })
+    }
+
+    inst.setOption({
+      tooltip: { trigger: 'axis' },
+      grid: { left: 45, right: hasConflict ? 50 : 20, top: 30, bottom: 40 },
+      legend: { top: 0, right: 0, icon: 'line', textStyle: { fontSize: 11 } },
+      xAxis: {
+        type: 'category',
+        data: xLabels,
+        axisLabel: { hideOverlap: true, color: '#595959', fontSize: 11 },
+        axisTick: { show: false },
+      },
+      yAxis: yAxes,
       series,
     })
-  }, [xLabels, values, intensity, idealCurve])
+  }, [xLabels, values, conflictValues, idealCurve])
 
   return <div ref={ref} style={{ width: '100%', height }} />
 }

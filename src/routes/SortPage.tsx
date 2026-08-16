@@ -700,7 +700,7 @@ function EmotionView({
         <EmotionCurve
           xLabels={xLabels}
           values={values}
-          intensity={sortedCards.map((c) => c.intensity ?? 1)}
+          conflictValues={sortedCards.map((c) => c.intensity ?? 1)}
           onPointClick={(idx) => {
             const c = sortedCards[idx]
             if (c) {
@@ -711,7 +711,7 @@ function EmotionView({
           }}
         />
         <p className="px-1 pb-1 text-[10px] text-ink-400">
-          提示：点击曲线上的点可修改对应卡片的情绪值和强度
+          提示：点击曲线上的点可修改对应卡片的情绪值和冲突强度
         </p>
       </div>
 
@@ -735,7 +735,7 @@ function EmotionView({
                 <span>·</span>
                 <span>情绪 {(c.emotion ?? 0).toFixed(0)}</span>
                 <span>·</span>
-                <span>强度 {c.intensity ?? 1}</span>
+                <span>冲突 {c.intensity ?? 1}</span>
                 <button
                   onClick={() => {
                     setEditingId(c.id)
@@ -810,7 +810,7 @@ function EditEmotionDialog({
           />
         </div>
         <div className="mb-4">
-          <label className="mb-1 block text-xs text-ink-500">强度：{i}（1~5）</label>
+          <label className="mb-1 block text-xs text-ink-500">冲突强度：{i}（1~5）</label>
           <input
             type="range"
             min={1}

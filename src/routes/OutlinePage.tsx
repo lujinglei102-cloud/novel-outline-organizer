@@ -77,6 +77,10 @@ export function OutlinePage() {
   const totalCardCount = sortedCards.length || rawCards.length
   const emotionVals = emotionSeries.map((p) => p.y)
   const emotionXL = emotionSeries.map((p) => `#${p.x + 1}`)
+  const conflictVals = emotionSeries.map((p) => {
+    const card = sortedCards.find((c) => c.id === p.cardId)
+    return card?.intensity ?? 1
+  })
   const ideal = activeTpl?.idealEmotion ?? []
 
   return (
@@ -214,7 +218,7 @@ export function OutlinePage() {
           <section className="rounded border border-ink-200 bg-white p-4">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-ink-800">
-                ③ 情绪冲突曲线：实际 vs 模板理想
+                ③ 情绪冲突曲线：情绪值 + 冲突强度
               </h2>
               <button
                 onClick={() => runEmotionRetag()}
@@ -229,6 +233,7 @@ export function OutlinePage() {
               <EmotionCurve
                 xLabels={emotionXL}
                 values={emotionVals}
+                conflictValues={conflictVals}
                 idealCurve={
                   ideal.length
                     ? // 将理想曲线按节点长度扩展到 xLabels 长度
@@ -498,7 +503,7 @@ function ChapterEmotionForeshadowModal({
             {/* 情绪曲线 */}
             <div className="mb-4">
               <h4 className="mb-2 text-sm font-semibold text-ink-700">情绪起伏曲线</h4>
-              <EmotionCurve xLabels={xLabels} values={stats.emotions} intensity={stats.intensities} height={240} />
+              <EmotionCurve xLabels={xLabels} values={stats.emotions} conflictValues={stats.intensities} height={240} />
             </div>
 
             {/* 伏笔标注 */}

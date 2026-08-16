@@ -137,9 +137,9 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
           />
         </div>
 
-        {/* 强度 */}
+        {/* 冲突强度 */}
         <div className="mt-2">
-          <label className="mb-1 block text-xs text-ink-500">强度：{intensity}（1~5）</label>
+          <label className="mb-1 block text-xs text-ink-500">冲突强度：{intensity}（1~5，越大冲突越激烈）</label>
           <input
             data-testid="card-intensity-input"
             type="range"
