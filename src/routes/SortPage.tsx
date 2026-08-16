@@ -35,6 +35,7 @@ export function SortPage() {
     toggleLinkResolved,
     toggleForeshadowCard,
     runEmotionRetag,
+    refreshEmotionSeries,
     saveTagToCard,
     emotionSeries,
     loadPersisted,
@@ -62,10 +63,17 @@ export function SortPage() {
       if (id === 'line') await runSort()
       if (id === 'chars') await runCharacters(sortedCards.length ? sortedCards : undefined)
       if (id === 'links') await runLinks(sortedCards.length ? sortedCards : undefined)
-      if (id === 'emotion') await runEmotionRetag()
+      // 情绪标注：不再自动重新标注，只用当前 sortedCards 的情绪值刷新曲线
+      if (id === 'emotion') refreshEmotionSeries()
     } finally {
       // 保留标记，不反复触发
     }
+  }
+
+  // 从叙事线排序一键跳转到情绪标注（保留当前情绪值，不重新计算）
+  function gotoEmotionTab() {
+    refreshEmotionSeries()
+    setTab('emotion')
   }
 
   return (
@@ -121,6 +129,7 @@ export function SortPage() {
           onReorder={reorderCards}
           onHighlight={setHighlightCardId}
           highlightId={highlightCardId}
+          onGotoEmotion={gotoEmotionTab}
         />
       )}
       {tab === 'chars' && (
@@ -166,8 +175,9 @@ function NarrativeLineView({
   onReorder,
   onHighlight,
   highlightId,
+  onGotoEmotion,
 }: {
-  cards: { id: string; title?: string; content: string; createdAt: number; stage?: string }[]
+  cards: { id: string; title?: string; content: string; createdAt: number; stage?: string; emotion?: number }[]
   gaps: SortGap[]
   turningPoints: TurningPoint[]
   totalCount: number
@@ -175,6 +185,7 @@ function NarrativeLineView({
   onReorder: (from: number, to: number) => Promise<void>
   onHighlight: (id: string | null) => void
   highlightId: string | null
+  onGotoEmotion: () => void
 }) {
   const [runing, setRuning] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
@@ -190,20 +201,29 @@ function NarrativeLineView({
           )}
           <span className="ml-2 text-ink-400">· 拖拽卡片可调整顺序</span>
         </p>
-        <button
-          onClick={async () => {
-            setRuning(true)
-            try {
-              await onRun()
-            } finally {
-              setRuning(false)
-            }
-          }}
-          className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
-          disabled={runing}
-        >
-          ↻ 重新排序
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onGotoEmotion}
+            disabled={cards.length === 0}
+            className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 disabled:opacity-40"
+          >
+            一键情绪标注 →
+          </button>
+          <button
+            onClick={async () => {
+              setRuning(true)
+              try {
+                await onRun()
+              } finally {
+                setRuning(false)
+              }
+            }}
+            className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
+            disabled={runing}
+          >
+            ↻ 重新排序
+          </button>
+        </div>
       </div>
       {cards.length === 0 ? (
         <div className="rounded border border-dashed border-ink-200 p-8 text-center text-sm text-ink-500">
@@ -658,6 +678,7 @@ function EmotionView({
         <p className="text-xs text-ink-500">
           已标注 {sortedCards.filter((c) => typeof c.emotion === 'number').length} /{' '}
           {sortedCards.length}
+          <span className="ml-2 text-ink-400">· 手动设置的值不会被覆盖</span>
         </p>
         <button
           onClick={async () => {
@@ -671,7 +692,7 @@ function EmotionView({
           disabled={loading}
           className="rounded border border-ink-200 px-3 py-1 text-xs hover:bg-ink-50 disabled:opacity-50"
         >
-          ↻ 批量重新标注
+          ↻ 自动补标（仅未手动标注的卡片）
         </button>
       </div>
 

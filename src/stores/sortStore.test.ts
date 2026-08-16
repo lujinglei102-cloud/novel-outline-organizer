@@ -190,3 +190,41 @@ describe('sortStore - toggleLinkResolved', () => {
     expect(dbLinks.find((l) => l.id === linkId)?.resolved).toBe(true)
   })
 })
+
+describe('sortStore - refreshEmotionSeries', () => {
+  it('只用当前 sortedCards 情绪值刷新曲线，不重新标注', async () => {
+    await addCard({ title: '卡A', content: '甜蜜重逢', stage: 'pre', emotion: 3, intensity: 4, emotionManual: true })
+    await addCard({ title: '卡B', content: '心碎分手', stage: 'post', emotion: -5, intensity: 5, emotionManual: true })
+    await useSortStore.getState().runSort()
+
+    // sortedCards 保留了手动情绪值
+    const sorted = useSortStore.getState().sortedCards
+    expect(sorted[0].emotion).toBe(3)
+    expect(sorted[1].emotion).toBe(-5)
+
+    // refreshEmotionSeries 不改变 sortedCards 的情绪值
+    useSortStore.getState().refreshEmotionSeries()
+    const after = useSortStore.getState().sortedCards
+    expect(after[0].emotion).toBe(3)
+    expect(after[1].emotion).toBe(-5)
+
+    // emotionSeries 反映当前情绪值
+    const series = useSortStore.getState().emotionSeries
+    expect(series).toHaveLength(2)
+    expect(series.find((p) => p.cardId === sorted[0].id)?.y).toBe(3)
+    expect(series.find((p) => p.cardId === sorted[1].id)?.y).toBe(-5)
+  })
+
+  it('refreshEmotionSeries 与 runEmotionRetag 区别：前者不覆盖手动值', async () => {
+    await addCard({ title: '卡A', content: '甜蜜', stage: 'pre', emotion: -2, intensity: 3, emotionManual: true })
+    await useSortStore.getState().runSort()
+
+    // refreshEmotionSeries 保留手动值 -2
+    useSortStore.getState().refreshEmotionSeries()
+    expect(useSortStore.getState().sortedCards[0].emotion).toBe(-2)
+
+    // runEmotionRetag 也应该保留手动值（因为 emotionManual=true）
+    await useSortStore.getState().runEmotionRetag()
+    expect(useSortStore.getState().sortedCards[0].emotion).toBe(-2)
+  })
+})

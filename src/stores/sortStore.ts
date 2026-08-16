@@ -49,6 +49,7 @@ interface SortState {
   toggleLinkResolved: (id: string) => Promise<void>
   toggleForeshadowCard: (cardId: string) => Promise<void>
   runEmotionRetag: () => Promise<void>
+  refreshEmotionSeries: () => void
   saveTagToCard: (cardId: string, emotion: number, intensity: number) => Promise<void>
   runSkeletonDirections: (
     preferredTemplateIds?: string[],
@@ -155,6 +156,11 @@ export const useSortStore = create<SortState>((set, get) => ({
     const cards = get().sortedCards.length > 0 ? get().sortedCards : await getAllCards()
     const tagged = engineRetagAll(cards) as Card[]
     set({ sortedCards: tagged, emotionSeries: computeEmotionSeries(tagged) })
+  },
+
+  refreshEmotionSeries: () => {
+    // 只用当前 sortedCards 的情绪值刷新曲线，不重新标注（保留用户手动值）
+    set({ emotionSeries: computeEmotionSeries(get().sortedCards) })
   },
 
   saveTagToCard: async (cardId, emotion, intensity) => {
