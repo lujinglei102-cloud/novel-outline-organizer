@@ -28,6 +28,8 @@ beforeEach(async () => {
     activeTemplateId: null,
     nodes: [],
     chapters: [],
+    lastSortCache: null,
+    lastCacheHit: false,
   })
   useCardStore.setState({ cards: [], filterCharacterId: null, filterBookId: null })
 })
@@ -261,5 +263,139 @@ describe('sortStore - restoreManualEmotion', () => {
     await useSortStore.getState().restoreManualEmotion()
     const orderAfter = useSortStore.getState().sortedCards.map((c) => c.id)
     expect(orderAfter).toEqual(orderBefore)
+  })
+})
+
+describe('sortStore - 梳理结果缓存 (T3.8)', () => {
+  it('同批卡片未改时二次梳理命中缓存（秒出）', async () => {
+    await addCard({ title: '卡A', content: '沈知行初见玉佩', stage: 'pre' })
+    await addCard({ title: '卡B', content: '沈知行雨夜重逢', stage: 'mid' })
+
+    // 第一次梳理：未命中缓存，重新计算
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+    expect(useSortStore.getState().lastSortCache).not.toBeNull()
+    const firstSortedAt = useSortStore.getState().sortedAt
+    expect(firstSortedAt).not.toBeNull()
+
+    // 第二次梳理：同批卡片未改 → 命中缓存
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastCacheHit).toBe(true)
+    // sortedAt 应该保持第一次的时间（从缓存恢复）
+    expect(useSortStore.getState().sortedAt).toBe(firstSortedAt)
+  })
+
+  it('编辑卡片后缓存自动失效，重新计算', async () => {
+    await addCard({ title: '卡A', content: '初见沈知行', stage: 'pre' })
+    await addCard({ title: '卡B', content: '中段', stage: 'mid' })
+    // 把 DB 中的卡片加载到 cardStore state（cardStore.edit 会同步到 sortStore）
+    await useCardStore.getState().loadAll()
+
+    // 第一次梳理
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+    const firstFingerprint = useSortStore.getState().lastSortCache?.fingerprint
+    expect(firstFingerprint).toBeTruthy()
+
+    // 通过 cardStore.edit 编辑卡片内容 → 自动失效缓存
+    const cardA = useCardStore.getState().cards[0]
+    expect(cardA).toBeDefined()
+    await useCardStore.getState().edit(cardA.id, { content: '初见沈知行，玉佩为信物' })
+    expect(useSortStore.getState().lastSortCache).toBeNull()
+
+    // 第二次梳理：缓存已失效，重新计算
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+    // 指纹应变化（因为 content 长度变了）
+    const secondFingerprint = useSortStore.getState().lastSortCache?.fingerprint
+    expect(secondFingerprint).not.toBe(firstFingerprint)
+  })
+
+  it('删除卡片后缓存自动失效', async () => {
+    await addCard({ title: '卡A', content: '初见', stage: 'pre' })
+    await addCard({ title: '卡B', content: '中段', stage: 'mid' })
+    await addCard({ title: '卡C', content: '结局', stage: 'post' })
+    await useCardStore.getState().loadAll()
+
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().sortedCards).toHaveLength(3)
+    expect(useSortStore.getState().lastSortCache).not.toBeNull()
+
+    // 删除一张卡片 → 缓存失效
+    const cardA = useCardStore.getState().cards[0]
+    expect(cardA).toBeDefined()
+    await useCardStore.getState().remove(cardA.id)
+    expect(useSortStore.getState().lastSortCache).toBeNull()
+
+    // 重新梳理后只有 2 张
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().sortedCards).toHaveLength(2)
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+  })
+
+  it('手动改情绪值后缓存失效', async () => {
+    await addCard({ title: '卡A', content: '甜蜜', stage: 'pre', emotion: 0, intensity: 1 })
+    await useSortStore.getState().runSort()
+
+    // 手动改情绪 → 缓存失效（指纹中含 emotion 字段）
+    const cardId = useSortStore.getState().sortedCards[0].id
+    await useSortStore.getState().saveTagToCard(cardId, 5, 4)
+    expect(useSortStore.getState().lastSortCache).toBeNull()
+
+    // 重新梳理会用新的情绪值
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+    expect(useSortStore.getState().sortedCards[0].emotion).toBe(5)
+  })
+
+  it('reorderCards 后缓存失效', async () => {
+    await addCard({ title: '卡A', content: '初见', stage: 'pre' })
+    await addCard({ title: '卡B', content: '中段', stage: 'mid' })
+    await addCard({ title: '卡C', content: '结局', stage: 'post' })
+
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastSortCache).not.toBeNull()
+
+    await useSortStore.getState().reorderCards(0, 2)
+    expect(useSortStore.getState().lastSortCache).toBeNull()
+  })
+
+  it('invalidateCache 手动失效缓存', async () => {
+    await addCard({ title: '卡A', content: '初见', stage: 'pre' })
+    await useSortStore.getState().runSort()
+    expect(useSortStore.getState().lastSortCache).not.toBeNull()
+
+    useSortStore.getState().invalidateCache()
+    expect(useSortStore.getState().lastSortCache).toBeNull()
+    expect(useSortStore.getState().lastCacheHit).toBe(false)
+  })
+
+  it('runCharacters 命中缓存时跳过重算', async () => {
+    await addCard({ title: '卡A', content: '沈知行初见玉佩', stage: 'pre' })
+    await addCard({ title: '卡B', content: '沈知行雨夜重逢', stage: 'mid' })
+
+    // 第一次 runSort 会一并计算角色并写入缓存
+    await useSortStore.getState().runSort()
+    const charsAfterFirstSort = useSortStore.getState().characters
+    expect(charsAfterFirstSort.length).toBeGreaterThan(0)
+
+    // 直接调 runCharacters 应命中缓存
+    await useSortStore.getState().runCharacters()
+    expect(useSortStore.getState().lastCacheHit).toBe(true)
+    // 角色列表与第一次一致
+    expect(useSortStore.getState().characters).toEqual(charsAfterFirstSort)
+  })
+
+  it('runLinks 命中缓存时跳过重算', async () => {
+    await addCard({ title: '卡A', content: '玉佩为信物', stage: 'pre' })
+    await addCard({ title: '卡B', content: '玉佩被摔碎', stage: 'post' })
+
+    await useSortStore.getState().runSort()
+    const linksAfterFirstSort = useSortStore.getState().links
+
+    // 直接调 runLinks 应命中缓存
+    await useSortStore.getState().runLinks()
+    expect(useSortStore.getState().lastCacheHit).toBe(true)
+    expect(useSortStore.getState().links).toEqual(linksAfterFirstSort)
   })
 })

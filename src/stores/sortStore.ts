@@ -20,6 +20,42 @@ export interface SkeletonDirection {
   nodeRatios: number[]
 }
 
+/**
+ * 计算卡片列表的内容指纹（用于梳理结果缓存命中判断）
+ * 指纹由卡片数量 + 每张卡的关键字段（id/updatedAt/content长度/emotion/intensity/stage）组成
+ * 卡片顺序无关（先按 id 排序），任何字段变化都会改变指纹
+ */
+function computeCardsFingerprint(cards: Card[]): string {
+  if (cards.length === 0) return '0_empty'
+  const sig = cards
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(
+      (c) =>
+        `${c.id}:${c.updatedAt ?? 0}:${c.content?.length ?? 0}:${c.emotion ?? 0}:${c.intensity ?? 1}:${c.stage ?? 'none'}`,
+    )
+    .join('|')
+  // 简单 djb2 hash
+  let h = 5381
+  for (let i = 0; i < sig.length; i++) {
+    h = ((h << 5) + h + sig.charCodeAt(i)) | 0
+  }
+  return `${cards.length}_${(h >>> 0).toString(16)}`
+}
+
+/** 梳理结果缓存：同批卡片未改则秒出 */
+interface SortCache {
+  fingerprint: string
+  sortedCards: Card[]
+  gaps: SortGap[]
+  turningPoints: TurningPoint[]
+  characters: Character[]
+  cardCharacterMap: Record<string, string>
+  links: Link[]
+  emotionSeries: { x: number; y: number; cardId: string }[]
+  cachedAt: number
+}
+
 interface SortState {
   // narrative
   sortedCards: Card[]
@@ -40,6 +76,9 @@ interface SortState {
   nodes: string[] // 当前结构节点名（默认模板）+ 用户自定义
   // chapters
   chapters: Chapter[]
+  // 梳理结果缓存（T3.8）
+  lastSortCache: SortCache | null
+  lastCacheHit: boolean // 上次操作是否命中缓存（便于 UI 提示）
   // actions
   runSort: () => Promise<void>
   runCharacters: (cards?: Card[]) => Promise<void>
@@ -64,6 +103,8 @@ interface SortState {
   removeNode: (index: number) => void
   loadPersisted: () => Promise<void>
   resetAll: () => void
+  // 缓存失效：卡片变更时调用
+  invalidateCache: () => void
   // util
   getNodes: () => string[]
   getActiveTemplate: () => Template | undefined
@@ -91,24 +132,78 @@ export const useSortStore = create<SortState>((set, get) => ({
   activeTemplateId: null,
   nodes: [], // 空数组代表跟随默认模板
   chapters: [],
+  lastSortCache: null,
+  lastCacheHit: false,
 
   runSort: async () => {
     const cards = await getAllCards()
+    const fingerprint = computeCardsFingerprint(cards)
+    const cache = get().lastSortCache
+    // 命中缓存：同批卡片未改则秒出
+    if (cache && cache.fingerprint === fingerprint) {
+      console.log('[runSort] 缓存命中，跳过重算（fingerprint=' + fingerprint + '）')
+      set({
+        sortedCards: cache.sortedCards,
+        gaps: cache.gaps,
+        turningPoints: cache.turningPoints,
+        sortedAt: cache.cachedAt,
+        emotionSeries: cache.emotionSeries,
+        characters: cache.characters,
+        cardCharacterMap: cache.cardCharacterMap,
+        links: cache.links,
+        lastCacheHit: true,
+      })
+      return
+    }
+    console.log('[runSort] 缓存未命中，重新计算（fingerprint=' + fingerprint + '）')
     const { cards: sorted, gaps, turningPoints } = sortNarrativeLine(cards)
-    // 把 order 回写到每张卡（仅 memory，用户确认后再保存）
+    // 同步计算角色、伏笔、情绪曲线（一并缓存）
+    const charResult = extractCharacters(sorted)
+    const foundLinks = findForeshadowLinks(sorted)
+    const emotionSeries = computeEmotionSeries(sorted)
+    const newCache: SortCache = {
+      fingerprint,
+      sortedCards: sorted,
+      gaps,
+      turningPoints,
+      characters: charResult.characters,
+      cardCharacterMap: Object.fromEntries(charResult.cardCharacterMap),
+      links: foundLinks,
+      emotionSeries,
+      cachedAt: Date.now(),
+    }
     set({
       sortedCards: sorted,
       gaps,
       turningPoints,
-      sortedAt: Date.now(),
-      emotionSeries: computeEmotionSeries(sorted),
+      sortedAt: newCache.cachedAt,
+      emotionSeries,
+      characters: charResult.characters,
+      cardCharacterMap: newCache.cardCharacterMap,
+      links: foundLinks,
+      lastSortCache: newCache,
+      lastCacheHit: false,
     })
+    // 写回 DB（角色和关联）
+    await putCharacters(charResult.characters)
+    await putLinks(foundLinks)
   },
 
   runCharacters: async (cardsIn) => {
     const cards = cardsIn ?? get().sortedCards.length > 0 ? get().sortedCards : await getAllCards()
+    // 若缓存已包含角色结果且指纹一致，直接使用缓存（不重算）
+    const cache = get().lastSortCache
+    if (cache && cache.characters.length > 0 && computeCardsFingerprint(cards) === cache.fingerprint) {
+      console.log('[runCharacters] 缓存命中，跳过重算')
+      set({
+        characters: cache.characters,
+        cardCharacterMap: cache.cardCharacterMap,
+        lastCacheHit: true,
+      })
+      return
+    }
     const r = extractCharacters(cards)
-    set({ characters: r.characters, cardCharacterMap: Object.fromEntries(r.cardCharacterMap) })
+    set({ characters: r.characters, cardCharacterMap: Object.fromEntries(r.cardCharacterMap), lastCacheHit: false })
     await putCharacters(r.characters)
   },
 
@@ -127,8 +222,15 @@ export const useSortStore = create<SortState>((set, get) => ({
 
   runLinks: async (cardsIn) => {
     const cards = cardsIn ?? get().sortedCards.length > 0 ? get().sortedCards : await getAllCards()
+    // 若缓存已包含关联结果且指纹一致，直接使用缓存
+    const cache = get().lastSortCache
+    if (cache && cache.links.length >= 0 && computeCardsFingerprint(cards) === cache.fingerprint) {
+      console.log('[runLinks] 缓存命中，跳过重算')
+      set({ links: cache.links, lastCacheHit: true })
+      return
+    }
     const found = findForeshadowLinks(cards)
-    set({ links: found })
+    set({ links: found, lastCacheHit: false })
     await putLinks(found)
   },
 
@@ -149,6 +251,8 @@ export const useSortStore = create<SortState>((set, get) => ({
       sortedCards: get().sortedCards.map((c) =>
         c.id === cardId ? { ...c, foreshadowResolved: newResolved } : c,
       ),
+      // 伏笔状态变化不影响叙事线/角色/情绪，但影响伏笔列表 → 失效缓存
+      lastSortCache: null,
     })
   },
 
@@ -176,7 +280,7 @@ export const useSortStore = create<SortState>((set, get) => ({
     })
     const changedCount = tagged.filter((c, i) => c.emotion !== (cards[i]?.emotion ?? 0) || c.intensity !== (cards[i]?.intensity ?? 1)).length
     console.log(`[runEmotionRetag] 共变更 ${changedCount}/${tagged.length} 张卡片，其中 ${tagged.filter((c) => c.emotionManual).length} 张保留手动值`)
-    set({ sortedCards: tagged, emotionSeries: computeEmotionSeries(tagged) })
+    set({ sortedCards: tagged, emotionSeries: computeEmotionSeries(tagged), lastSortCache: null })
   },
 
   refreshEmotionSeries: () => {
@@ -212,7 +316,7 @@ export const useSortStore = create<SortState>((set, get) => ({
     })
     const changedCount = restored.filter((c, i) => c.emotion !== (beforeCards[i]?.emotion ?? 0) || c.intensity !== (beforeCards[i]?.intensity ?? 1)).length
     console.log(`[restoreManualEmotion] 共恢复 ${changedCount}/${restored.length} 张卡片到 DB 原始值`)
-    set({ sortedCards: restored, emotionSeries: computeEmotionSeries(restored) })
+    set({ sortedCards: restored, emotionSeries: computeEmotionSeries(restored), lastSortCache: null })
   },
 
   saveTagToCard: async (cardId, emotion, intensity) => {
@@ -223,6 +327,8 @@ export const useSortStore = create<SortState>((set, get) => ({
     set({
       sortedCards: updated,
       emotionSeries: computeEmotionSeries(updated),
+      // 手动改情绪值 → 失效缓存（指纹中包含 emotion/intensity）
+      lastSortCache: null,
     })
     // DB
     const { updateCard } = await import('@/db/cardRepo')
@@ -295,7 +401,8 @@ export const useSortStore = create<SortState>((set, get) => ({
     cards.splice(toIndex, 0, moved)
     // 更新 order 字段（基于新位置）
     const updated = cards.map((c, i) => ({ ...c, order: i * 100 }))
-    set({ sortedCards: updated, emotionSeries: computeEmotionSeries(updated) })
+    // 排序变化 → 失效缓存（叙事线、情绪曲线 x 轴都变）
+    set({ sortedCards: updated, emotionSeries: computeEmotionSeries(updated), lastSortCache: null })
     // 写回 DB
     const { updateCard } = await import('@/db/cardRepo')
     await Promise.all(updated.map((c) => updateCard(c.id, { order: c.order })))
@@ -327,6 +434,10 @@ export const useSortStore = create<SortState>((set, get) => ({
     set({ characters, links, chapters })
   },
 
+  invalidateCache: () => {
+    set({ lastSortCache: null, lastCacheHit: false })
+  },
+
   resetAll: () =>
     set({
       sortedCards: [],
@@ -342,6 +453,8 @@ export const useSortStore = create<SortState>((set, get) => ({
       activeTemplateId: null,
       nodes: [],
       chapters: [],
+      lastSortCache: null,
+      lastCacheHit: false,
     }),
 
   getNodes: () => {
