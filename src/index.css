@@ -106,7 +106,9 @@
     background: var(--bg-gradient, var(--bg-color));
     background-attachment: fixed;
     color: var(--text-color);
+    /* 100vh 在 iOS Safari 会包含地址栏，使用 dvh 动态视口高度避免内容被遮挡 */
     min-height: 100vh;
+    min-height: 100dvh;
     font-size: 15px;
     line-height: 1.65;
     letter-spacing: 0.02em;
@@ -403,7 +405,9 @@ body::before {
   .cyber-modal {
     width: 100vw !important;
     max-width: 100vw !important;
+    /* iOS Safari 地址栏会导致 100vh 偏大，使用 dvh 修正 */
     max-height: 100vh !important;
+    max-height: 100dvh !important;
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
@@ -445,6 +449,26 @@ body::before {
   /* CardThumb 操作按钮在移动端始终显示（无 hover 概念） */
   .card-actions {
     opacity: 1 !important;
+  }
+}
+
+/* =====================================================
+   iOS Safe Area 适配（notch/home indicator）
+   配合 viewport-fit=cover 使用
+   ===================================================== */
+@supports (padding: env(safe-area-inset-top)) {
+  /* 离线横幅顶部留出刘海空间 */
+  .offline-banner {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+  /* 主内容底部留出 home indicator 空间 */
+  main {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+  /* 全屏弹窗内部留出安全区 */
+  .cyber-modal {
+    padding-left: max(20px, env(safe-area-inset-left)) !important;
+    padding-right: max(20px, env(safe-area-inset-right)) !important;
   }
 }
 

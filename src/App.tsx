@@ -1,5 +1,7 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
+import { OfflineBanner } from '@/components/OfflineBanner'
+import { PWAUpdatePrompt } from '@/components/PWAUpdatePrompt'
 import { CardsPage } from '@/routes/CardsPage'
 import { SortPage } from '@/routes/SortPage'
 import { OutlinePage } from '@/routes/OutlinePage'
@@ -12,7 +14,8 @@ const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
 export default function App() {
   return (
     <HashRouter basename={basename || '/'}>
-      <div className="min-h-screen relative z-10 text-ink-800">
+      <div className="relative z-10 text-ink-800" style={{ minHeight: '100dvh' }}>
+        <OfflineBanner />
         <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-4">
           <Routes>
@@ -31,6 +34,7 @@ export default function App() {
             />
           </Routes>
         </main>
+        <PWAUpdatePrompt />
       </div>
     </HashRouter>
   )

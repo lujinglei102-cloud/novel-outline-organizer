@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { useCardStore } from '@/stores/cardStore'
 import { useBookStore } from '@/stores/bookStore'
 import { CardThumb } from '@/components/CardThumb'
@@ -8,6 +9,11 @@ import { EmptyState, CardDetailModal } from '@/components/EmptyState'
 import { BackupRestore } from '@/components/BackupRestore'
 import { SAMPLE_CARDS } from '@/data/sampleCards'
 import type { Card } from '@/types'
+
+// 卡片数量超过此阈值时启用虚拟列表，避免大量 DOM 渲染卡顿
+const VIRTUAL_THRESHOLD = 30
+// 单行卡片高度估值（含 gap），用于虚拟化估算
+const ROW_ESTIMATE = 168
 
 const ONBOARDING_KEY = 'onboarding-completed'
 
@@ -23,6 +29,26 @@ export function CardsPage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [confirmSort, setConfirmSort] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
+  // 虚拟列表：列数响应式（与 Tailwind 配置 sm=768/lg=1024 断点一致）
+  const [colCount, setColCount] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.innerWidth >= 1024
+        ? 4
+        : window.innerWidth >= 768
+          ? 2
+          : 1
+      : 1,
+  )
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth
+      setColCount(w >= 1024 ? 4 : w >= 768 ? 2 : 1)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   useEffect(() => {
     ;(async () => {
@@ -70,6 +96,15 @@ export function CardsPage() {
   }
 
   const visible = useCardStore((s) => s.visibleCards())
+
+  // 虚拟列表：按行虚拟化，行数 = ceil(卡片数 / 列数)
+  const rowCount = Math.max(0, Math.ceil(visible.length / Math.max(1, colCount)))
+  const rowVirtualizer = useWindowVirtualizer({
+    count: rowCount,
+    estimateSize: () => ROW_ESTIMATE,
+    overscan: 3,
+  })
+  const shouldVirtualize = visible.length > VIRTUAL_THRESHOLD
 
   const handleSort = () => {
     if (cards.length < 5) {
@@ -241,6 +276,51 @@ export function CardsPage() {
           actionLabel="+ 新建第一张卡片"
           onAction={() => setShowCreate(true)}
         />
+      ) : shouldVirtualize ? (
+        // 虚拟列表：大量卡片时只渲染可视区域内的行，避免 DOM 堆积卡顿
+        <div
+          data-testid="card-grid-virtual"
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: `${rowVirtualizer.getTotalSize()}px`,
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((row) => {
+            const start = row.index * colCount
+            const rowCards = visible.slice(start, start + colCount)
+            return (
+              <div
+                key={row.key}
+                data-row-index={row.index}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${row.start}px)`,
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))`,
+                  gap: '0.75rem',
+                  paddingBottom: '0.75rem',
+                }}
+              >
+                {rowCards.map((card) => (
+                  <CardThumb
+                    key={card.id}
+                    card={card}
+                    onClick={() => setDetail(card)}
+                    onDoubleClick={() => setEditing(card)}
+                    onEdit={() => setEditing(card)}
+                    onDelete={() =>
+                      setPendingDelete({ id: card.id, title: card.title || '（无标题）' })
+                    }
+                  />
+                ))}
+              </div>
+            )
+          })}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {visible.map((card) => (

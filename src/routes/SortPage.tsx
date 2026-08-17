@@ -201,7 +201,7 @@ function NarrativeLineView({
           {turningPoints.length > 0 && (
             <span className="ml-2 text-red-500">⚠ {turningPoints.length} 处转折事件待处理</span>
           )}
-          <span className="ml-2 text-ink-400">· 拖拽卡片可调整顺序</span>
+          <span className="ml-2 text-ink-400">· 拖拽卡片可调整顺序（移动端可用 ↑↓ 按钮）</span>
         </p>
         <div className="flex gap-2">
           <button
@@ -281,6 +281,25 @@ function NarrativeLineView({
                   </span>
                   <span className="mt-1 text-ink-300 select-none">⣿</span>
                   <CardThumb card={c as any} hideActions />
+                  {/* ↑↓ 按钮：作为拖拽的备用方案，移动端（HTML5 DnD 不可用）尤其依赖 */}
+                  <div className="flex flex-col gap-1 self-center">
+                    <button
+                      onClick={() => onReorder(i, i - 1)}
+                      disabled={i === 0}
+                      title="上移"
+                      className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => onReorder(i, i + 1)}
+                      disabled={i === cards.length - 1}
+                      title="下移"
+                      className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
+                    >
+                      ↓
+                    </button>
+                  </div>
                 </div>
                 {tpHere.map((tp, idx) => (
                   <div

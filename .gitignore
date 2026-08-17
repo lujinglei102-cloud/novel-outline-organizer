@@ -11,4 +11,10 @@ vite.config.d.ts
 test/_engine_js/
 *.jpg
 *.png
+# PWA 图标必须纳入版本控制
+!public/pwa-192.png
+!public/pwa-512.png
+!public/favicon.png
 debug.log
+# 临时提取的 PRD 文本
+prd_text.txt

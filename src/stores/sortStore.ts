@@ -5,13 +5,13 @@ import { getAllCharacters, putCharacters, updateCharacter, deleteCharacter } fro
 import { getAllLinks, putLinks, toggleLinkResolved } from '@/db/linkRepo'
 import { getAllChapters, putChapters } from '@/db/chapterRepo'
 
-import { sortNarrativeLine } from '@/engine/narrativeLine'
 import type { TurningPoint } from '@/engine/narrativeLine'
 import { extractCharacters } from '@/engine/characterExtract'
 import { findForeshadowLinks } from '@/engine/foreshadowLink'
 import { tagEmotion, retagAll as engineRetagAll } from '@/engine/emotionTag'
 import { generateSkeletonDirections, splitIntoChapters } from '@/engine/skeletonGen'
 import { TEMPLATES } from '@/data/templates'
+import { runSortInWorker } from '@/workers/sortClient'
 
 export interface SkeletonDirection {
   templateId: string
@@ -156,11 +156,14 @@ export const useSortStore = create<SortState>((set, get) => ({
       return
     }
     console.log('[runSort] 缓存未命中，重新计算（fingerprint=' + fingerprint + '）')
-    const { cards: sorted, gaps, turningPoints } = sortNarrativeLine(cards)
-    // 同步计算角色、伏笔、情绪曲线（一并缓存）
-    const charResult = extractCharacters(sorted)
-    const foundLinks = findForeshadowLinks(sorted)
-    const emotionSeries = computeEmotionSeries(sorted)
+    // 排序/角色/伏笔/情绪曲线计算放到 Web Worker，避免阻塞 UI
+    const computed = await runSortInWorker(cards)
+    const sorted = computed.sortedCards
+    const gaps = computed.gaps
+    const turningPoints = computed.turningPoints
+    const charResult = { characters: computed.characters, cardCharacterMap: new Map(computed.cardCharacterMapEntries) }
+    const foundLinks = computed.links
+    const emotionSeries = computed.emotionSeries
     const newCache: SortCache = {
       fingerprint,
       sortedCards: sorted,
