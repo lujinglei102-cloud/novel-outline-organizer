@@ -2,8 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
+// 开发模式 base=/（本地访问 http://localhost:5173/），生产模式 base=/novel-outline-organizer/（GitHub Pages）
+const isProd = process.env.NODE_ENV === 'production'
+
 export default defineConfig({
-  base: '/novel-outline-organizer/',
+  base: isProd ? '/novel-outline-organizer/' : '/',
   plugins: [react()],
   resolve: {
     alias: {

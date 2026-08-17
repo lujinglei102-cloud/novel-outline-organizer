@@ -50,7 +50,10 @@ export function extractCharacters(cards: Card[]): CharacterResult {
   const posWords = ['喜欢','爱','幸福','甜','笑','开心','拥抱','告白']
   const negWords = ['恨','分手','痛苦','哭','绝望','放下','离开','背叛']
 
-  const chars: Character[] = [...mention.entries()].map(([name, v]) => {
+  const chars: Character[] = [...mention.entries()]
+    // 过滤：mentionCount < 2 的条目不视为角色（偶然出现一次的词很可能是噪声）
+    .filter(([, v]) => v.count >= 2)
+    .map(([name, v]) => {
     const sorted = [...v.cards].sort((a, b) => timeIndex(a, cards) - timeIndex(b, cards))
     const first = sorted[0]
     const representativeDesc = first ? first.content.slice(0, 30) + (first.content.length > 30 ? '…' : '') : ''
@@ -75,6 +78,12 @@ export function extractCharacters(cards: Card[]): CharacterResult {
       conflictTag,
     }
   }).sort((a, b) => b.mentionCount - a.mentionCount)
+
+  // cardPrimary 也需要清理：被过滤掉的角色不应该作为卡片的主要角色
+  const validNames = new Set(chars.map((c) => c.name))
+  for (const [cardId, name] of cardPrimary.entries()) {
+    if (!validNames.has(name)) cardPrimary.delete(cardId)
+  }
 
   return { characters: chars, cardCharacterMap: cardPrimary }
 }

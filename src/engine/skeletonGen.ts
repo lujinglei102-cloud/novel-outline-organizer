@@ -51,7 +51,8 @@ function buildDirection(
   variant: 'default' | 'variant',
 ): SkeletonDirection {
   const nodes = tpl.nodes
-  const segments = nodes.length
+  // 实际使用的段数：当卡片数少于节点数时，裁剪到 N 段，保证每段至少 1 张卡片
+  const segments = Math.min(nodes.length, Math.max(1, N))
   // 按模板理想情绪或默认「每段比例均衡 1/segments 每张」来分
   const ratios: number[] = new Array(segments).fill(1 / segments)
   // 轻微偏移：variant 让第二段（转/破裂点）前移或后移
@@ -66,12 +67,26 @@ function buildDirection(
 
   let cumulative = 0
   const boundaries: Boundary[] = []
+  let prevEnd = -1 // 上一段的结束位置，用于确保单调递增
   for (let i = 0; i < segments; i++) {
     cumulative += ratios[i]
     // 第 i 段的结束位置
     const endFloat = Math.round(cumulative * N) - 1
-    const endIndex = i === segments - 1 ? N - 1 : Math.max(i, Math.min(N - 1 - (segments - 1 - i), endFloat))
+    // 每段至少覆盖到第 i 张卡片（minEnd），同时给后面段至少留 1 张（maxEnd）
+    const minEnd = i // 第 i 段至少覆盖到第 i 张卡片（含）
+    const maxEnd = N - 1 - (segments - 1 - i) // 给后面每段至少留 1 张
+    let endIndex: number
+    if (i === segments - 1) {
+      endIndex = N - 1
+    } else {
+      endIndex = Math.max(minEnd, Math.min(maxEnd, endFloat))
+    }
+    // 额外保护：确保 endIndex > prevEnd（单调递增），否则取 prevEnd + 1
+    if (endIndex <= prevEnd) endIndex = prevEnd + 1
+    // 再做一次上界保护
+    if (endIndex > N - 1) endIndex = N - 1
     boundaries.push({ nodeIndex: i, afterCardIndex: endIndex })
+    prevEnd = endIndex
   }
 
   // 锚点建议：每个锚点分配到对应段中间偏右的位置
@@ -114,14 +129,27 @@ export function splitIntoChapters(
   let chIdx = 1
   for (let seg = 0; seg < boundaries.length; seg++) {
     const start = seg === 0 ? 0 : boundaries[seg - 1].afterCardIndex + 1
-    const end = boundaries[seg].afterCardIndex
+    let end = boundaries[seg].afterCardIndex
+    // 保护：如果 start > end（理论上修过 buildDirection 后不会再发生），
+    // 至少取 1 张卡片避免段内卡片数为负
+    if (start > end) {
+      end = start
+    }
+    // 上界保护
+    if (end > sortedCards.length - 1) end = sortedCards.length - 1
+    if (start > sortedCards.length - 1) continue
+
     const segCards = sortedCards.slice(start, end + 1)
     const nCards = segCards.length
+    if (nCards === 0) continue
+
     let chapterCount = perNode ?? 1
     if (perNode === undefined) {
       if (nCards >= 7) chapterCount = 3
       else if (nCards >= 4) chapterCount = 2
     }
+    // 防御：chapterCount 不超过 nCards
+    if (chapterCount > nCards) chapterCount = nCards
 
     const perChapter = Math.floor(nCards / chapterCount)
     let idx = 0

@@ -5,7 +5,11 @@ import { useBookStore } from '@/stores/bookStore'
 import { CardThumb } from '@/components/CardThumb'
 import { CardEditModal } from '@/components/CardEditModal'
 import { EmptyState, CardDetailModal } from '@/components/EmptyState'
+import { BackupRestore } from '@/components/BackupRestore'
+import { SAMPLE_CARDS } from '@/data/sampleCards'
 import type { Card } from '@/types'
+
+const ONBOARDING_KEY = 'onboarding-completed'
 
 export function CardsPage() {
   const navigate = useNavigate()
@@ -16,10 +20,20 @@ export function CardsPage() {
   const [newBookTitle, setNewBookTitle] = useState('')
   const [editing, setEditing] = useState<Card | null>(null)
   const [detail, setDetail] = useState<Card | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [confirmSort, setConfirmSort] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null)
 
   useEffect(() => {
-    loadBooks()
-    loadAll()
+    ;(async () => {
+      await loadBooks()
+      await loadAll()
+      // 首次访问且无任何卡片时，提示是否载入示例数据
+      const done = localStorage.getItem(ONBOARDING_KEY)
+      if (!done && useCardStore.getState().cards.length === 0) {
+        setShowOnboarding(true)
+      }
+    })()
   }, [loadBooks, loadAll])
 
   // 同步 currentBookId 到 cardStore 的 filterBookId
@@ -27,14 +41,91 @@ export function CardsPage() {
     useCardStore.getState().setBookFilter(currentBookId)
   }, [currentBookId])
 
+  // 键盘快捷键：Ctrl/Cmd+N 新建卡片
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault()
+        setShowCreate(true)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const handleLoadSample = async () => {
+    // 创建一本示例书，把示例卡片都关联到该书
+    const book = await createBook('示例：玉佩之约')
+    setCurrent(book.id)
+    for (const seed of SAMPLE_CARDS) {
+      await create({ ...seed, bookId: book.id })
+    }
+    localStorage.setItem(ONBOARDING_KEY, '1')
+    setShowOnboarding(false)
+  }
+
+  const handleSkipOnboarding = () => {
+    localStorage.setItem(ONBOARDING_KEY, '1')
+    setShowOnboarding(false)
+  }
+
   const visible = useCardStore((s) => s.visibleCards())
 
   const handleSort = () => {
     if (cards.length < 5) {
-      if (!confirm(`当前灵感还比较少（${cards.length} 张），梳理效果可能有限，确定继续吗？`))
-        return
+      setConfirmSort(true)
+      return
     }
     navigate('/sort')
+  }
+
+  const handleSortConfirm = () => {
+    setConfirmSort(false)
+    navigate('/sort')
+  }
+
+  // 阶段一导出：把当前可见卡片导出为 Markdown 灵感清单
+  const handleExportCards = () => {
+    const list = visible
+    if (list.length === 0) return
+    const stageLabel: Record<string, string> = {
+      pre: '前期',
+      mid: '中期',
+      post: '后期',
+      none: '未分类',
+    }
+    const date = new Date()
+    const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    const lines: string[] = []
+    lines.push('# 灵感卡片清单')
+    lines.push('')
+    lines.push(`- 导出日期：${today}`)
+    lines.push(`- 来源书籍：${currentBook?.title ?? '全部书籍'}`)
+    lines.push(`- 卡片总数：${list.length}`)
+    lines.push('')
+    list.forEach((c, i) => {
+      lines.push(`## #${i + 1} · ${c.title || '（无标题）'}`)
+      lines.push('')
+      lines.push(`- 阶段：${stageLabel[c.stage ?? 'none']}`)
+      if (typeof c.emotion === 'number') lines.push(`- 情绪值：${c.emotion > 0 ? '+' : ''}${c.emotion}`)
+      if (typeof c.intensity === 'number') lines.push(`- 冲突强度：${c.intensity}`)
+      if (c.isForeshadow) lines.push(`- 伏笔：${c.foreshadowResolved ? '已回收' : '未回收'}`)
+      lines.push('')
+      if (c.content) {
+        lines.push(c.content)
+        lines.push('')
+      }
+    })
+    const md = lines.join('\n')
+    const blob = new Blob([md], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `灵感清单-${today}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   const handleCreateBook = async () => {
@@ -107,6 +198,15 @@ export function CardsPage() {
           >
             一键梳理 →
           </button>
+          <button
+            data-testid="export-cards-btn"
+            onClick={handleExportCards}
+            disabled={visible.length === 0}
+            className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50 disabled:opacity-40"
+            title="把当前可见的灵感卡片导出为 Markdown"
+          >
+            导出清单
+          </button>
         </div>
       </div>
 
@@ -116,6 +216,17 @@ export function CardsPage() {
           当前书籍：<span className="font-semibold text-ink-800 neon-text">{currentBook.title}</span>
         </div>
       )}
+
+      {/* 备份/恢复 */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded border border-ink-200 bg-ink-100/30 px-3 py-2">
+        <span className="text-xs text-ink-500">数据备份：</span>
+        <BackupRestore
+          onRestored={async () => {
+            await loadBooks()
+            await loadAll()
+          }}
+        />
+      </div>
 
       {/* 卡片区 */}
       {loading ? (
@@ -138,6 +249,8 @@ export function CardsPage() {
               card={card}
               onClick={() => setDetail(card)}
               onDoubleClick={() => setEditing(card)}
+              onEdit={() => setEditing(card)}
+              onDelete={() => setPendingDelete({ id: card.id, title: card.title || '（无标题）' })}
             />
           ))}
         </div>
@@ -149,6 +262,53 @@ export function CardsPage() {
       </div>
 
       {/* 弹窗 */}
+      {showOnboarding && (
+        <div
+          data-testid="onboarding-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={handleSkipOnboarding}
+        >
+          <div
+            className="w-full max-w-md rounded cyber-modal p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="mb-2 text-base font-semibold font-cute neon-text">
+              欢迎来到小说大纲梳理器
+            </h2>
+            <p className="mb-4 text-sm text-ink-600">
+              这是一个帮你把零散灵感整理成结构化大纲的小工具。
+              <br />
+              <br />
+              你可以：
+              <br />
+              · 录入灵感卡片（标题 + 正文 + 情绪 + 伏笔）
+              <br />
+              · 一键梳理叙事线、角色、伏笔、情绪
+              <br />
+              · 生成章节骨架并导出 Markdown
+              <br />
+              <br />
+              首次使用要不要载入一份示例数据看看效果？
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                data-testid="onboarding-skip-btn"
+                onClick={handleSkipOnboarding}
+                className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
+              >
+                不用了，我自己来
+              </button>
+              <button
+                data-testid="onboarding-load-btn"
+                onClick={handleLoadSample}
+                className="rounded cyber-btn px-4 py-1.5 text-sm"
+              >
+                载入示例
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showCreate && (
         <CardEditModal
           onSave={async (input) => {
@@ -181,6 +341,75 @@ export function CardsPage() {
           }}
           onClose={() => setDetail(null)}
         />
+      )}
+
+      {/* 确认：卡片数少仍要梳理 */}
+      {confirmSort && (
+        <div
+          data-testid="confirm-sort-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setConfirmSort(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded cyber-modal p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-2 text-base font-semibold font-cute neon-text">提示</h3>
+            <p className="mb-4 text-sm text-ink-600">
+              当前灵感还比较少（{cards.length} 张），梳理效果可能有限，确定继续吗？
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmSort(false)}
+                className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSortConfirm}
+                className="rounded cyber-btn px-4 py-1.5 text-sm"
+              >
+                确定继续
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 确认：删除卡片 */}
+      {pendingDelete && (
+        <div
+          data-testid="confirm-delete-modal"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setPendingDelete(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded cyber-modal p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="mb-2 text-base font-semibold font-cute neon-text">确认删除</h3>
+            <p className="mb-4 text-sm text-ink-600">
+              确定删除卡片「{pendingDelete.title}」？此操作不可恢复。
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setPendingDelete(null)}
+                className="rounded border border-ink-300 px-4 py-1.5 text-sm hover:bg-ink-200/50"
+              >
+                取消
+              </button>
+              <button
+                onClick={async () => {
+                  await remove(pendingDelete.id)
+                  setPendingDelete(null)
+                }}
+                className="rounded border border-red-500/60 bg-red-500/15 px-4 py-1.5 text-sm text-red-400 hover:bg-red-500/25"
+              >
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
