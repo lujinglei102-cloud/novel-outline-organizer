@@ -33,6 +33,32 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
     setHasInput(title.trim().length > 0)
   }, [title])
 
+  // 键盘快捷键：Ctrl/Cmd+S 保存，Esc 关闭
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        if (title.trim()) {
+          onSave({
+            title,
+            content,
+            characterId: initial?.characterId,
+            stage,
+            emotion,
+            intensity,
+            emotionManual: true,
+            isForeshadow,
+          })
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onCancel()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [title, content, stage, emotion, intensity, isForeshadow, initial, onSave, onCancel])
+
   const remainingTitle = MAX_TITLE_LEN - title.length
   const remainingBody = MAX_BODY_LEN - content.length
 
@@ -181,6 +207,9 @@ export function CardEditModal({ initial, characterName, onSave, onCancel }: Prop
           >
             保存
           </button>
+        </div>
+        <div className="mt-2 text-right text-[10px] text-ink-400">
+          快捷键：Ctrl+S 保存 · Esc 关闭
         </div>
       </div>
     </div>
