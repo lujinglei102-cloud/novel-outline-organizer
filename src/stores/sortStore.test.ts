@@ -72,8 +72,10 @@ describe('sortStore - reorderCards', () => {
 })
 
 describe('sortStore - removeCharacter / renameCharacter', () => {
+  // 角色需要 mentionCount >= 2 才会被识别，所以每个角色至少出现 2 次
   it('removeCharacter 删除角色', async () => {
     await addCard({ title: '卡A', content: '沈知行和林婉清相遇', stage: 'pre' })
+    await addCard({ title: '卡B', content: '沈知行再次见到林婉清', stage: 'mid' })
     await useSortStore.getState().runSort()
     await useSortStore.getState().runCharacters()
 
@@ -94,6 +96,7 @@ describe('sortStore - removeCharacter / renameCharacter', () => {
 
   it('renameCharacter 修改角色名', async () => {
     await addCard({ title: '卡A', content: '沈知行和林婉清相遇', stage: 'pre' })
+    await addCard({ title: '卡B', content: '沈知行再次见到林婉清', stage: 'mid' })
     await useSortStore.getState().runSort()
     await useSortStore.getState().runCharacters()
 
@@ -108,6 +111,7 @@ describe('sortStore - removeCharacter / renameCharacter', () => {
 
   it('renameCharacter 空名不修改', async () => {
     await addCard({ title: '卡A', content: '沈知行和林婉清相遇', stage: 'pre' })
+    await addCard({ title: '卡B', content: '沈知行再次见到林婉清', stage: 'mid' })
     await useSortStore.getState().runSort()
     await useSortStore.getState().runCharacters()
 

@@ -280,7 +280,7 @@ function NarrativeLineView({
                     {i + 1}
                   </span>
                   <span className="mt-1 text-ink-300 select-none">⣿</span>
-                  <CardThumb card={c as any} />
+                  <CardThumb card={c as any} hideActions />
                 </div>
                 {tpHere.map((tp, idx) => (
                   <div
