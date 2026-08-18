@@ -7,13 +7,11 @@ import { SortPage } from '@/routes/SortPage'
 import { OutlinePage } from '@/routes/OutlinePage'
 import { ExportPage } from '@/routes/ExportPage'
 
-// 开发模式下 base=/，生产模式下 base=/novel-outline-organizer/
-// HashRouter 的 basename 不需要尾部斜杠
-const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
-
+// HashRouter 使用 URL hash（#/cards）进行路由，与 Vite base path 无关。
+// basename 必须是 '/'，否则生产环境下会变成 /novel-outline-organizer/cards 导致路由不匹配、页面空白。
 export default function App() {
   return (
-    <HashRouter basename={basename || '/'}>
+    <HashRouter basename="/">
       <div className="relative z-10 text-ink-800" style={{ minHeight: '100dvh' }}>
         <OfflineBanner />
         <Navbar />
