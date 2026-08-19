@@ -1,6 +1,6 @@
-import type { Card, SortGap, Character, Link } from '@/types'
+import type { Card, SortGap, Character, Link, StructuralAnalysis } from '@/types'
 import type { TurningPoint } from '@/engine/narrativeLine'
-import { sortNarrativeLine } from '@/engine/narrativeLine'
+import { sortNarrativeLine, buildStructuralAnalysis } from '@/engine/narrativeLine'
 import { extractCharacters } from '@/engine/characterExtract'
 import { findForeshadowLinks } from '@/engine/foreshadowLink'
 import type { SortWorkerResponse } from './sort.worker'
@@ -13,15 +13,17 @@ export interface SortComputeResult {
   cardCharacterMapEntries: [string, string][]
   links: Link[]
   emotionSeries: { x: number; y: number; cardId: string }[]
+  structuralAnalysis: StructuralAnalysis
 }
 
 /**
  * 同步计算 fallback（在 Worker 不可用时使用，比如 jsdom 测试环境）
  */
 export function computeSortSync(cards: Card[]): SortComputeResult {
-  const { cards: sorted, gaps, turningPoints } = sortNarrativeLine(cards)
+  const { cards: sorted, gaps, turningPoints, scored } = sortNarrativeLine(cards)
   const charResult = extractCharacters(sorted)
   const foundLinks = findForeshadowLinks(sorted)
+  const structuralAnalysis = buildStructuralAnalysis(sorted, turningPoints, scored, gaps)
   return {
     sortedCards: sorted,
     gaps,
@@ -30,6 +32,7 @@ export function computeSortSync(cards: Card[]): SortComputeResult {
     cardCharacterMapEntries: Array.from(charResult.cardCharacterMap.entries()),
     links: foundLinks,
     emotionSeries: sorted.map((c, i) => ({ x: i, y: c.emotion ?? 0, cardId: c.id })),
+    structuralAnalysis,
   }
 }
 
@@ -76,6 +79,7 @@ function getWorker(): Worker | null {
           cardCharacterMapEntries: data.cardCharacterMapEntries,
           links: data.links,
           emotionSeries: data.emotionSeries,
+          structuralAnalysis: data.structuralAnalysis,
         })
       }
     }

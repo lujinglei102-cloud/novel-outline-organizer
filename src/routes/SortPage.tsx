@@ -4,7 +4,7 @@ import { useCardStore } from '@/stores/cardStore'
 import { useSortStore } from '@/stores/sortStore'
 import { CardThumb } from '@/components/CardThumb'
 import { EmotionCurve } from '@/components/EmotionCurve'
-import type { Character, Link, SortGap } from '@/types'
+import type { Character, Link, SortGap, StructuralAnalysis, Severity } from '@/types'
 import type { TurningPoint } from '@/engine/narrativeLine'
 
 const TABS = [
@@ -25,6 +25,7 @@ export function SortPage() {
     sortedCards,
     gaps,
     turningPoints,
+    structuralAnalysis,
     runCharacters,
     removeCharacter,
     renameCharacter,
@@ -46,6 +47,11 @@ export function SortPage() {
   const [tab, setTab] = useState<TabId>('line')
   const [loadingTabs, setLoadingTabs] = useState<Set<TabId>>(new Set())
   const [highlightCardId, setHighlightCardId] = useState<string | null>(null)
+  // 叙事建议：已忽略的 id 集合
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
+  function handleDismiss(suggestionId: string) {
+    setDismissedIds((prev) => new Set([...prev, suggestionId]))
+  }
 
   useEffect(() => {
     loadCards()
@@ -56,12 +62,18 @@ export function SortPage() {
     }
   }, [loadCards, loadPersisted]) // eslint-disable-line
 
+  // 包装 runSort：每次重新排序时清空已忽略建议
+  async function wrappedRunSort() {
+    setDismissedIds(new Set())
+    await runSort()
+  }
+
   async function ensureTab(id: TabId) {
     setTab(id)
     if (loadingTabs.has(id)) return
     setLoadingTabs((s) => new Set(s).add(id))
     try {
-      if (id === 'line') await runSort()
+      if (id === 'line') await wrappedRunSort()
       if (id === 'chars') await runCharacters(sortedCards.length ? sortedCards : undefined)
       if (id === 'links') await runLinks(sortedCards.length ? sortedCards : undefined)
       // 情绪标注：不再自动重新标注，只用当前 sortedCards 的情绪值刷新曲线
@@ -125,12 +137,15 @@ export function SortPage() {
           cards={sortedCards}
           gaps={gaps}
           turningPoints={turningPoints}
+          structuralAnalysis={structuralAnalysis}
           totalCount={cards.length}
-          onRun={runSort}
+          onRun={wrappedRunSort}
           onReorder={reorderCards}
           onHighlight={setHighlightCardId}
           highlightId={highlightCardId}
           onGotoEmotion={gotoEmotionTab}
+          dismissedIds={dismissedIds}
+          onDismiss={handleDismiss}
         />
       )}
       {tab === 'chars' && (
@@ -167,31 +182,38 @@ export function SortPage() {
   )
 }
 
-/* =============== 子视图：叙事线 =============== */
+/* =============== 子视图：叙事线（方案B双层架构） =============== */
 function NarrativeLineView({
   cards,
   gaps,
   turningPoints,
+  structuralAnalysis,
   totalCount,
   onRun,
   onReorder,
   onHighlight,
   highlightId,
   onGotoEmotion,
+  dismissedIds,
+  onDismiss,
 }: {
-  cards: { id: string; title?: string; content: string; createdAt: number; stage?: string; emotion?: number }[]
+  cards: { id: string; title?: string; content: string; createdAt: number; stage?: string; emotion?: number; intensity?: number }[]
   gaps: SortGap[]
   turningPoints: TurningPoint[]
+  structuralAnalysis: StructuralAnalysis | null
   totalCount: number
   onRun: () => Promise<void>
   onReorder: (from: number, to: number) => Promise<void>
   onHighlight: (id: string | null) => void
   highlightId: string | null
   onGotoEmotion: () => void
+  dismissedIds: Set<string>
+  onDismiss: (id: string) => void
 }) {
   const [runing, setRuning] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [overIndex, setOverIndex] = useState<number | null>(null)
+  const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(false)
 
   return (
     <div>
@@ -227,110 +249,407 @@ function NarrativeLineView({
           </button>
         </div>
       </div>
+
       {cards.length === 0 ? (
         <div className="rounded border border-dashed border-ink-300 p-8 text-center text-sm text-ink-500">
           暂无卡片，请先在阶段一录入灵感
         </div>
       ) : (
-        <ol className="space-y-2">
-          {cards.map((c, i) => {
-            const gapHere = gaps.find((g) => g.afterIndex === i)
-            const tpHere = turningPoints.filter((tp) => tp.afterCardId === c.id)
-            const isHi = highlightId === c.id
-            const isDragging = dragIndex === i
-            const isOver = overIndex === i && dragIndex !== null && dragIndex !== i
-            return (
-              <li key={c.id}>
-                <div
-                  draggable
-                  onDragStart={(e) => {
-                    setDragIndex(i)
-                    e.dataTransfer.effectAllowed = 'move'
-                  }}
-                  onDragEnd={() => {
-                    setDragIndex(null)
-                    setOverIndex(null)
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault()
-                    setOverIndex(i)
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault()
-                    if (dragIndex !== null && dragIndex !== i) {
-                      onReorder(dragIndex, i)
-                    }
-                    setDragIndex(null)
-                    setOverIndex(null)
-                  }}
-                  onMouseEnter={() => onHighlight(c.id)}
-                  onMouseLeave={() => onHighlight(null)}
-                  className={
-                    'flex items-start gap-3 rounded border p-3 transition cursor-grab active:cursor-grabbing ' +
-                    (isDragging
-                      ? 'border-accent-periwinkle bg-accent-periwinkle/15 opacity-50 '
+        <>
+          {/* ===== Layer 1：结构分析（始终展示） ===== */}
+          {structuralAnalysis && (
+            <StructuralAnalysisPanel
+              analysis={structuralAnalysis}
+              cards={cards}
+              onPointClick={(idx) => {
+                const c = cards[idx]
+                if (c) onHighlight(c.id)
+              }}
+            />
+          )}
+
+          {/* ===== Layer 2：叙事建议（可折叠 + 逐条忽略） ===== */}
+          <NarrativeSuggestionsPanel
+            turningPoints={turningPoints}
+            dismissedIds={dismissedIds}
+            onDismiss={onDismiss}
+            collapsed={suggestionsCollapsed}
+            onToggleCollapsed={() => setSuggestionsCollapsed((v) => !v)}
+          />
+
+          {/* ===== 卡片时间线（保留 inline 提示） ===== */}
+          <ol className="space-y-2">
+            {cards.map((c, i) => {
+              const gapHere = gaps.find((g) => g.afterIndex === i)
+              const tpHere = turningPoints.filter((tp) => tp.afterCardId === c.id)
+              const isHi = highlightId === c.id
+              const isDragging = dragIndex === i
+              const isOver = overIndex === i && dragIndex !== null && dragIndex !== i
+              return (
+                <li key={c.id}>
+                  <div
+                    draggable
+                    onDragStart={(e) => {
+                      setDragIndex(i)
+                      e.dataTransfer.effectAllowed = 'move'
+                    }}
+                    onDragEnd={() => {
+                      setDragIndex(null)
+                      setOverIndex(null)
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      setOverIndex(i)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (dragIndex !== null && dragIndex !== i) {
+                        onReorder(dragIndex, i)
+                      }
+                      setDragIndex(null)
+                      setOverIndex(null)
+                    }}
+                    onMouseEnter={() => onHighlight(c.id)}
+                    onMouseLeave={() => onHighlight(null)}
+                    className={
+                      'flex items-start gap-3 rounded border p-3 transition cursor-grab active:cursor-grabbing ' +
+                      (isDragging
+                        ? 'border-accent-periwinkle bg-accent-periwinkle/15 opacity-50 '
                         : isOver
-                      ? 'border-green-500 bg-green-900/30 '
-                      : isHi
-                      ? 'border-accent-periwinkle bg-accent-periwinkle/15'
-                      : 'border-ink-300 cyber-surface hover:bg-ink-200/50')
-                  }
-                >
-                  <span className="mt-1 w-6 flex-shrink-0 text-right text-xs text-ink-400 select-none">
-                    {i + 1}
-                  </span>
-                  <span className="mt-1 text-ink-300 select-none">⣿</span>
-                  <CardThumb card={c as any} hideActions />
-                  {/* ↑↓ 按钮：作为拖拽的备用方案，移动端（HTML5 DnD 不可用）尤其依赖 */}
-                  <div className="flex flex-col gap-1 self-center">
-                    <button
-                      onClick={() => onReorder(i, i - 1)}
-                      disabled={i === 0}
-                      title="上移"
-                      className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      onClick={() => onReorder(i, i + 1)}
-                      disabled={i === cards.length - 1}
-                      title="下移"
-                      className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
-                    >
-                      ↓
-                    </button>
-                  </div>
-                </div>
-                {tpHere.map((tp, idx) => (
-                  <div
-                    key={`${tp.type}-${idx}`}
-                    className={
-                      'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
-                      (tp.severity === 'high'
-                        ? 'border-red-500 bg-red-900/30 text-red-400'
-                        : 'border-semantic-warning/60 bg-semantic-warning/15 text-semantic-warning')
+                        ? 'border-green-500 bg-green-900/30 '
+                        : isHi
+                        ? 'border-accent-periwinkle bg-accent-periwinkle/15'
+                        : 'border-ink-300 cyber-surface hover:bg-ink-200/50')
                     }
                   >
-                    {tp.severity === 'high' ? '🔴' : '🟠'} [{tp.type === 'stage_transition' ? '阶段跳跃' : tp.type === 'emotion_shift' ? '情绪翻转' : '转折缺失'}] {tp.hint}
+                    <span className="mt-1 w-6 flex-shrink-0 text-right text-xs text-ink-400 select-none">
+                      {i + 1}
+                    </span>
+                    <span className="mt-1 text-ink-300 select-none">⣿</span>
+                    <CardThumb card={c as any} hideActions />
+                    {/* ↑↓ 按钮：作为拖拽的备用方案，移动端（HTML5 DnD 不可用）尤其依赖 */}
+                    <div className="flex flex-col gap-1 self-center">
+                      <button
+                        onClick={() => onReorder(i, i - 1)}
+                        disabled={i === 0}
+                        title="上移"
+                        className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => onReorder(i, i + 1)}
+                        disabled={i === cards.length - 1}
+                        title="下移"
+                        className="flex h-6 w-6 items-center justify-center rounded border border-ink-300 bg-ink-100/80 text-xs text-ink-700 hover:bg-accent-periwinkle/25 hover:text-ink-900 disabled:opacity-30 disabled:hover:bg-ink-100/80"
+                      >
+                        ↓
+                      </button>
+                    </div>
                   </div>
-                ))}
-                {gapHere && !tpHere.length && (
-                  <div
-                    className={
-                      'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
-                      (gapHere.density === 'dense'
-                        ? 'pixel-badge pixel-badge-amber'
-                        : 'pixel-badge pixel-badge-red')
-                    }
-                  >
-                    💡 {gapHere.hint}
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ol>
+                  {tpHere.map((tp, idx) => {
+                    const sugId = `${tp.afterCardId}-${tp.type}-${idx}`
+                    if (dismissedIds.has(sugId)) return null
+                    return (
+                      <div
+                        key={sugId}
+                        className={
+                          'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
+                          (tp.severity === 'high'
+                            ? 'border-red-500 bg-red-900/30 text-red-400'
+                            : 'border-semantic-warning/60 bg-semantic-warning/15 text-semantic-warning')
+                        }
+                      >
+                        {tp.severity === 'high' ? '🔴' : '🟠'} [{tp.type === 'stage_transition' ? '阶段跳跃' : tp.type === 'emotion_shift' ? '情绪翻转' : '转折缺失'}] {tp.hint}
+                      </div>
+                    )
+                  })}
+                  {gapHere && !tpHere.some((tp, idx) => !dismissedIds.has(`${tp.afterCardId}-${tp.type}-${idx}`)) && (
+                    <div
+                      className={
+                        'my-2 ml-9 rounded border-l-4 px-3 py-2 text-xs ' +
+                        (gapHere.density === 'dense'
+                          ? 'pixel-badge pixel-badge-amber'
+                          : 'pixel-badge pixel-badge-red')
+                      }
+                    >
+                      💡 {gapHere.hint}
+                    </div>
+                  )}
+                </li>
+              )
+            })}
+          </ol>
+        </>
       )}
+    </div>
+  )
+}
+
+/* ===== Layer 1：结构分析面板 ===== */
+function StructuralAnalysisPanel({
+  analysis,
+  cards,
+  onPointClick,
+}: {
+  analysis: StructuralAnalysis
+  cards: { id: string; emotion?: number; intensity?: number }[]
+  onPointClick?: (idx: number) => void
+}) {
+  const values = cards.map((c) => c.emotion ?? 0)
+  const xLabels = cards.map((_, i) => `#${i + 1}`)
+  return (
+    <div className="mb-4 space-y-3 rounded border border-ink-300 cyber-surface p-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold font-cute text-accent-magenta neon-text">📊 结构分析</h2>
+      </div>
+
+      {/* 过渡质量评分条 */}
+      <QualityScoreBar quality={analysis.quality} />
+
+      {/* 三列并排：阶段分布 / 情绪曲线 / 节奏密度 */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <StageDistributionChart data={analysis.stageDistribution} />
+        <div className="rounded border border-ink-200 p-2">
+          <h4 className="mb-1 text-xs font-medium text-ink-600">情绪曲线</h4>
+          <EmotionCurve
+            xLabels={xLabels}
+            values={values}
+            conflictValues={cards.map((c) => c.intensity ?? 1)}
+            onPointClick={onPointClick}
+            height={180}
+          />
+          <p className="mt-1 px-1 text-[10px] text-ink-400">
+            最高 {analysis.emotionArc.maxEmotion} · 最低 {analysis.emotionArc.minEmotion} · 平均 {analysis.emotionArc.avgEmotion.toFixed(1)}
+            {analysis.emotionArc.hasReversal && <span className="ml-1 text-accent-magenta">· 有反转</span>}
+          </p>
+          {analysis.emotionArc.flatWarning && (
+            <p className="px-1 text-[10px] text-semantic-warning">⚠ {analysis.emotionArc.flatWarning}</p>
+          )}
+        </div>
+        <RhythmDensityView data={analysis.rhythmDensity} />
+      </div>
+    </div>
+  )
+}
+
+/* 质量评分条 */
+function QualityScoreBar({ quality }: { quality: StructuralAnalysis['quality'] }) {
+  const scoreColor = (s: number) =>
+    s >= 80 ? 'bg-green-500' : s >= 60 ? 'bg-accent-periwinkle' : s >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+  return (
+    <div className="space-y-2 rounded border border-ink-200 bg-ink-100/40 p-2.5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-medium text-ink-700">过渡质量评分</span>
+        <span className={`text-xl font-bold font-cute ${quality.overallScore >= 60 ? 'neon-text-cyan' : 'text-semantic-warning'}`}>
+          {quality.overallScore} <span className="text-xs font-normal text-ink-500">/ 100</span>
+        </span>
+      </div>
+      <div className="w-full h-2 rounded-full bg-ink-200 overflow-hidden">
+        <div
+          className={`h-full transition-all ${scoreColor(quality.overallScore)}`}
+          style={{ width: `${quality.overallScore}%` }}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {quality.categories.map((cat) => (
+          <div key={cat.name} className="rounded border border-ink-200 bg-white/40 p-1.5">
+            <div className="flex items-baseline justify-between text-[11px]">
+              <span className="text-ink-600">{cat.name}</span>
+              <span className={`font-semibold ${cat.score >= 20 ? 'text-green-600' : cat.score >= 12 ? 'text-accent-periwinkle' : 'text-semantic-warning'}`}>
+                {cat.score}/25
+              </span>
+            </div>
+            <div className="mt-0.5 w-full h-1.5 rounded-full bg-ink-200 overflow-hidden">
+              <div
+                className={`h-full ${scoreColor((cat.score / 25) * 100)}`}
+                style={{ width: `${(cat.score / 25) * 100}%` }}
+              />
+            </div>
+            <p className="mt-0.5 line-clamp-1 text-[9px] text-ink-500">{cat.comment}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* 阶段分布 */
+function StageDistributionChart({ data }: { data: StructuralAnalysis['stageDistribution'] }) {
+  const total = data.total || 1
+  const pct = (n: number) => Math.round((n / total) * 100)
+  const stageMeta: { key: 'pre' | 'mid' | 'post' | 'none'; label: string; color: string }[] = [
+    { key: 'pre', label: '前期', color: 'bg-accent-periwinkle' },
+    { key: 'mid', label: '中期', color: 'bg-accent-magenta/70' },
+    { key: 'post', label: '后期', color: 'bg-semantic-warning/80' },
+    { key: 'none', label: '未分', color: 'bg-ink-400' },
+  ]
+  return (
+    <div className="rounded border border-ink-200 p-2">
+      <h4 className="mb-1 text-xs font-medium text-ink-600">阶段分布</h4>
+      <div className="space-y-1.5">
+        {stageMeta.map((m) => (
+          <div key={m.key} className="flex items-center gap-2 text-[11px]">
+            <span className="w-8 text-ink-500">{m.label}</span>
+            <div className="flex-1 h-3 rounded bg-ink-200 overflow-hidden">
+              <div
+                className={`h-full ${m.color} transition-all`}
+                style={{ width: `${pct(data[m.key])}%` }}
+              />
+            </div>
+            <span className="w-10 text-right text-ink-600">
+              {data[m.key]} <span className="text-ink-400">({pct(data[m.key])}%)</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      {data.suggestion && (
+        <p className="mt-1.5 rounded bg-yellow-900/20 px-1.5 py-1 text-[10px] text-semantic-warning">
+          💡 {data.suggestion}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/* 节奏密度 */
+function RhythmDensityView({ data }: { data: StructuralAnalysis['rhythmDensity'] }) {
+  return (
+    <div className="rounded border border-ink-200 p-2">
+      <h4 className="mb-1 text-xs font-medium text-ink-600">节奏密度</h4>
+      {data.denseRegions.length === 0 && data.sparseRegions.length === 0 ? (
+        <p className="py-2 text-center text-[11px] text-ink-400">节奏均衡 ✨</p>
+      ) : (
+        <ul className="space-y-1 text-[10px]">
+          {data.denseRegions.map((r, i) => (
+            <li key={`d-${i}`} className="rounded border border-yellow-400/40 bg-yellow-900/20 px-2 py-1 text-yellow-200">
+              🟡 密集区 · 第{r.startIndex + 1}-{r.endIndex + 1}张（{r.cardCount}张）
+              <br />
+              <span className="text-yellow-300/80">{r.hint}</span>
+            </li>
+          ))}
+          {data.sparseRegions.map((r, i) => (
+            <li key={`s-${i}`} className="rounded border border-red-400/40 bg-red-900/20 px-2 py-1 text-red-200">
+              🔴 稀疏区 · 第{r.afterIndex + 1}张后
+              <br />
+              <span className="text-red-300/80">{r.hint}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/* ===== Layer 2：叙事建议面板（可折叠 + 逐条忽略） ===== */
+function NarrativeSuggestionsPanel({
+  turningPoints,
+  dismissedIds,
+  onDismiss,
+  collapsed,
+  onToggleCollapsed,
+}: {
+  turningPoints: TurningPoint[]
+  dismissedIds: Set<string>
+  onDismiss: (id: string) => void
+  collapsed: boolean
+  onToggleCollapsed: () => void
+}) {
+  const suggestions = turningPoints.map((tp, idx) => ({
+    id: `${tp.afterCardId}-${tp.type}-${idx}`,
+    afterCardId: tp.afterCardId,
+    type: tp.type,
+    hint: tp.hint,
+    severity: tp.severity as Severity,
+  }))
+  const active = suggestions.filter((s) => !dismissedIds.has(s.id))
+  const high = active.filter((s) => s.severity === 'high')
+  const medium = active.filter((s) => s.severity === 'medium')
+  const low = active.filter((s) => s.severity === 'low')
+
+  return (
+    <div className="mb-4 rounded border border-ink-300 cyber-surface">
+      <button
+        onClick={onToggleCollapsed}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-ink-200/40"
+      >
+        <span className="text-sm font-semibold font-cute text-accent-periwinkle neon-text-cyan">
+          💡 叙事建议
+        </span>
+        <span className="flex items-center gap-2 text-xs text-ink-500">
+          {active.length > 0 ? (
+            <span className="pixel-badge pixel-badge-red">{active.length} 条待处理</span>
+          ) : (
+            <span className="pixel-badge pixel-badge-green">全部处理完成 🎉</span>
+          )}
+          <span className="text-ink-400">{collapsed ? '▸ 展开' : '▾ 收起'}</span>
+        </span>
+      </button>
+      {!collapsed && (
+        <div className="space-y-3 border-t border-ink-200 p-3">
+          {active.length === 0 ? (
+            <p className="text-center text-xs text-ink-400">
+              暂无可处理的建议（{dismissedIds.size} 条已忽略）
+            </p>
+          ) : (
+            <>
+              <SuggestionGroup title="🔴 高优先级" items={high} color="red" onDismiss={onDismiss} />
+              <SuggestionGroup title="🟡 中优先级" items={medium} color="amber" onDismiss={onDismiss} />
+              <SuggestionGroup title="⚪ 低优先级" items={low} color="gray" onDismiss={onDismiss} />
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SuggestionGroup({
+  title,
+  items,
+  color,
+  onDismiss,
+}: {
+  title: string
+  items: { id: string; afterCardId: string; type: string; hint: string; severity: string }[]
+  color: 'red' | 'amber' | 'gray'
+  onDismiss: (id: string) => void
+}) {
+  if (items.length === 0) return null
+  const borderCls =
+    color === 'red'
+      ? 'border-red-400/40 bg-red-900/10'
+      : color === 'amber'
+      ? 'border-yellow-400/40 bg-yellow-900/10'
+      : 'border-ink-300 bg-ink-100/40'
+  const typeLabels: Record<string, string> = {
+    stage_transition: '阶段跳跃',
+    emotion_shift: '情绪翻转',
+    score_gap: '转折缺失',
+  }
+  return (
+    <div>
+      <div className="mb-1 flex items-center gap-2 text-xs">
+        <span className="font-medium text-ink-700">{title}</span>
+        <span className="pixel-badge pixel-badge-gray">{items.length}</span>
+      </div>
+      <ul className="space-y-1.5">
+        {items.map((s) => (
+          <li key={s.id} className={`flex items-start gap-2 rounded border px-2.5 py-2 text-xs ${borderCls}`}>
+            <span className="pixel-badge pixel-badge-gray mt-0.5 flex-shrink-0 text-[9px]">
+              {typeLabels[s.type] ?? s.type}
+            </span>
+            <span className="flex-1 text-ink-700">{s.hint}</span>
+            <button
+              onClick={() => onDismiss(s.id)}
+              className="flex-shrink-0 rounded border border-ink-300 bg-ink-100/80 px-2 py-0.5 text-[10px] text-ink-600 hover:bg-red-100 hover:text-red-600"
+              title="忽略该建议（本次排序生效）"
+            >
+              忽略
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

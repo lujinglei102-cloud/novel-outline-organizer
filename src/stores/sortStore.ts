@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Card, Character, Link, Chapter, SortGap, Template } from '@/types'
+import type { Card, Character, Link, Chapter, SortGap, Template, StructuralAnalysis } from '@/types'
 import { getAllCards } from '@/db/cardRepo'
 import { getAllCharacters, putCharacters, updateCharacter, deleteCharacter } from '@/db/characterRepo'
 import { getAllLinks, putLinks, toggleLinkResolved } from '@/db/linkRepo'
@@ -53,6 +53,7 @@ interface SortCache {
   cardCharacterMap: Record<string, string>
   links: Link[]
   emotionSeries: { x: number; y: number; cardId: string }[]
+  structuralAnalysis: StructuralAnalysis
   cachedAt: number
 }
 
@@ -61,6 +62,7 @@ interface SortState {
   sortedCards: Card[]
   gaps: SortGap[]
   turningPoints: TurningPoint[]
+  structuralAnalysis: StructuralAnalysis | null
   sortedAt: number | null
   // characters
   characters: Character[]
@@ -122,6 +124,7 @@ export const useSortStore = create<SortState>((set, get) => ({
   sortedCards: [],
   gaps: [],
   turningPoints: [],
+  structuralAnalysis: null,
   sortedAt: null,
   characters: [],
   cardCharacterMap: {},
@@ -146,6 +149,7 @@ export const useSortStore = create<SortState>((set, get) => ({
         sortedCards: cache.sortedCards,
         gaps: cache.gaps,
         turningPoints: cache.turningPoints,
+        structuralAnalysis: cache.structuralAnalysis,
         sortedAt: cache.cachedAt,
         emotionSeries: cache.emotionSeries,
         characters: cache.characters,
@@ -161,6 +165,7 @@ export const useSortStore = create<SortState>((set, get) => ({
     const sorted = computed.sortedCards
     const gaps = computed.gaps
     const turningPoints = computed.turningPoints
+    const structuralAnalysis = computed.structuralAnalysis
     const charResult = { characters: computed.characters, cardCharacterMap: new Map(computed.cardCharacterMapEntries) }
     const foundLinks = computed.links
     const emotionSeries = computed.emotionSeries
@@ -169,6 +174,7 @@ export const useSortStore = create<SortState>((set, get) => ({
       sortedCards: sorted,
       gaps,
       turningPoints,
+      structuralAnalysis,
       characters: charResult.characters,
       cardCharacterMap: Object.fromEntries(charResult.cardCharacterMap),
       links: foundLinks,
@@ -179,6 +185,7 @@ export const useSortStore = create<SortState>((set, get) => ({
       sortedCards: sorted,
       gaps,
       turningPoints,
+      structuralAnalysis,
       sortedAt: newCache.cachedAt,
       emotionSeries,
       characters: charResult.characters,
@@ -446,6 +453,7 @@ export const useSortStore = create<SortState>((set, get) => ({
       sortedCards: [],
       gaps: [],
       turningPoints: [],
+      structuralAnalysis: null,
       sortedAt: null,
       characters: [],
       cardCharacterMap: {},

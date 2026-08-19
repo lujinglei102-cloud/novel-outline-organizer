@@ -88,3 +88,85 @@ export interface SortResult {
   generatedAt: number
   cardHash: string
 }
+
+// ===== 方案B：结构分析 + 叙事建议 类型 =====
+
+export type TurningPointType = 'stage_transition' | 'emotion_shift' | 'score_gap'
+export type Severity = 'high' | 'medium' | 'low'
+
+// 转折时间线项（来自 turningPoints，描述性展示）
+export interface TurningPointTimelineItem {
+  afterCardId: string
+  type: TurningPointType
+  hint: string
+  severity: Severity
+}
+
+// 阶段分布
+export interface StageDistribution {
+  pre: number
+  mid: number
+  post: number
+  none: number
+  total: number
+  suggestion?: string
+}
+
+// 节奏密度
+export interface DenseRegion {
+  startIndex: number
+  endIndex: number
+  cardCount: number
+  hint: string
+}
+
+export interface SparseRegion {
+  afterIndex: number
+  afterCardId: string
+  hint: string
+}
+
+export interface RhythmDensity {
+  denseRegions: DenseRegion[]
+  sparseRegions: SparseRegion[]
+}
+
+// 情绪弧线摘要
+export interface EmotionArcSummary {
+  hasReversal: boolean
+  maxEmotion: number
+  minEmotion: number
+  avgEmotion: number
+  flatWarning?: string
+}
+
+// 过渡质量评分
+export interface QualityCategory {
+  name: string
+  score: number
+  comment: string
+}
+
+export interface NarrativeQuality {
+  overallScore: number
+  categories: QualityCategory[]
+}
+
+// 结构分析（Layer 1：描述性，始终展示）
+export interface StructuralAnalysis {
+  stageDistribution: StageDistribution
+  rhythmDensity: RhythmDensity
+  turningPointTimeline: TurningPointTimelineItem[]
+  emotionArc: EmotionArcSummary
+  quality: NarrativeQuality
+}
+
+// 叙事建议（Layer 2：可折叠，可忽略）
+export interface NarrativeSuggestion {
+  id: string
+  afterCardId: string
+  type: TurningPointType
+  hint: string
+  severity: Severity
+  dismissed: boolean
+}

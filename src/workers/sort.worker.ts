@@ -1,6 +1,6 @@
-import type { Card, SortGap, Character, Link } from '@/types'
+import type { Card, SortGap, Character, Link, StructuralAnalysis } from '@/types'
 import type { TurningPoint } from '@/engine/narrativeLine'
-import { sortNarrativeLine } from '@/engine/narrativeLine'
+import { sortNarrativeLine, buildStructuralAnalysis } from '@/engine/narrativeLine'
 import { extractCharacters } from '@/engine/characterExtract'
 import { findForeshadowLinks } from '@/engine/foreshadowLink'
 
@@ -24,6 +24,7 @@ export interface SortWorkerResponse {
   cardCharacterMapEntries: [string, string][]
   links: Link[]
   emotionSeries: { x: number; y: number; cardId: string }[]
+  structuralAnalysis: StructuralAnalysis
 }
 
 interface WorkerScope {
@@ -36,7 +37,7 @@ const scope = self as unknown as WorkerScope
 scope.addEventListener('message', (e: MessageEvent<SortWorkerRequest>) => {
   const { id, cards } = e.data
   try {
-    const { cards: sorted, gaps, turningPoints } = sortNarrativeLine(cards)
+    const { cards: sorted, gaps, turningPoints, scored } = sortNarrativeLine(cards)
     const charResult = extractCharacters(sorted)
     const foundLinks = findForeshadowLinks(sorted)
     const emotionSeries = sorted.map((c, i) => ({
@@ -44,6 +45,7 @@ scope.addEventListener('message', (e: MessageEvent<SortWorkerRequest>) => {
       y: c.emotion ?? 0,
       cardId: c.id,
     }))
+    const structuralAnalysis = buildStructuralAnalysis(sorted, turningPoints, scored, gaps)
     const response: SortWorkerResponse = {
       id,
       sortedCards: sorted,
@@ -53,6 +55,7 @@ scope.addEventListener('message', (e: MessageEvent<SortWorkerRequest>) => {
       cardCharacterMapEntries: Array.from(charResult.cardCharacterMap.entries()),
       links: foundLinks,
       emotionSeries,
+      structuralAnalysis,
     }
     scope.postMessage(response)
   } catch (err) {
